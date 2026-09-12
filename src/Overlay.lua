@@ -97,37 +97,57 @@ end
 function Overlay.drive(app)
     local g,index=app.game,app.driveIndex
     header("DF"..index..": MEDIA BAY")
-    line("CLICK THE UPPER BULB FOR SOURCE, LOWER FOR DESTINATION.",188)
+    line("LOWER BULB: OFF > COPY > V (AUTO VERIFY) > OFF.",188)
     line("INSERTED: "..(g.slots[index] or "empty"):upper(),224,"white")
     if g.phase=="swap" then line("THE COPIER NEEDS: "..g.swapMedia:upper().." IN DF"..g.swapDrive..":",257,"yellow") end
     UI.button("INSERT MASTER / SOURCE",84,299,580,"media",{index=index,media="source"})
     UI.button("INSERT DESTINATION / BLANK",84,332,580,"media",{index=index,media="blank"})
     UI.button("EJECT",84,365,580,"media",{index=index,media="empty"})
     UI.button("USE AS SOURCE",84,414,280,"drive_role",{index=index,role="source"})
-    UI.button("USE AS TARGET",380,414,284,"drive_role",{index=index,role="target"})
-    UI.text("One drive can be both source and destination. You'll swap media\nwhen the read buffer fills. A blank is used once per new copy.",84,463,8,"cyan",580)
+    UI.button("TARGET: "..({[0]="OFF",[1]="COPY",[2]="V"})[g.targets[index] or 0],380,414,284,"drive_role",{index=index,role="target"})
+    local copy=g.copies[index]
+    UI.text(copy and ("THIS DISK: "..(copy.verified and "VERIFIED" or "NOT VERIFIED").." / "..(copy.mode==2 and "AUTOMATIC V" or "MANUAL CHECK"))
+        or "Select several external targets to copy in parallel.\nEach target needs one blank and one remaining customer order.",84,463,8,"cyan",580)
 end
 function Overlay.tools(app)
     header("TOOLS")
-    local entries={{"CHECKDISK / DIAGNOSE","verify"},{"NOCHMAL / RETRY OR REPEAT","repeat"},
+    local entries={{"MARKET / MASTERS / HARDWARE","market"},{"TRACK RANGE / LENGTH / BUFFER","range"},
+        {"CHECKDISK / DIAGNOSE","verify"},{"NOCHMAL / RETRY OR REPEAT","repeat"},
         {"DISK INFORMATION","info"},{"FORMAT TARGET DISK","format"},{"ABORT CURRENT COPY","abort"},
-        {"AUDIO AND DISPLAY HELP","help"},{"ORIGINAL ART + MUSIC CREDITS","credits"}}
-    for i,e in ipairs(entries) do UI.button(e[1],84,185+(i-1)*46,580,e[2]) end
+        {"BUSINESS / OPERATION STATUS","status"},{"HELP","help"},{"ORIGINAL ART + MUSIC CREDITS","credits"}}
+    for i,e in ipairs(entries) do UI.button(e[1],84,179+(i-1)*30,580,e[2]) end
+    UI.button("MUSIC "..(app.settings.music and "ON" or "OFF"),84,491,280,"music")
+    UI.button("SFX "..(app.settings.sfx and "ON" or "OFF"),384,491,280,"sfx")
+end
+function Overlay.status(app)
+    local g,p=app.game,app.game.profile
+    header("COPY DESK / BUSINESS STATUS")
+    line("CASH $"..p.money.." / "..p.ram.." KB / "..p.drives.." DRIVES / "..p.blanks.." BLANKS",184,"white")
+    UI.text(g.message,84,219,9,"yellow",580)
+    line(g.job and g.job.title or "NO MASTER LOADED",279)
+    line("STATE: "..g.phase:upper().." / BUFFER: "..#g.buffer.." TRACKS / HEAT: "..math.floor(g.heat).."%",309)
+    for n,drive in ipairs(g:selectedTargets()) do
+        local copy=g.copies[drive]
+        line("DF"..drive..": "..(g.targets[drive]==2 and "V - AUTO VERIFY" or "COPY - MANUAL VERIFY")..(copy and (copy.verified and " / VERIFIED" or " / UNVERIFIED") or ""),333+n*27)
+    end
+    if g.phase=="complete" and g.verified then UI.button("DELIVER BATCH +$"..g:payout(),84,457,580,"deliver")
+    else UI.button("CHECKDISK / VERIFY TARGETS",84,457,580,"verify") end
+    UI.button("MARKET",84,493,280,"market"); UI.button("RETURN TO DESK",384,493,280,"close")
 end
 function Overlay.help(app)
     header("A SMALL DESK. A BIG DISK BUSINESS.")
     local lines={
         "1. MARKET: buy a master. DISK INFO shows the order.",
         "2. Set START / END tracks, SIDE, MODE, SYNC and LENGTH.",
-        "3. Upper bulb = source. Lower bulb = target. Click a drive",
-        "   to insert media. One DF0 can serve BOTH roles.",
+        "3. Upper bulb = source. Lower: OFF > COPY > V > OFF.",
+        "   Select several external targets for parallel copies.",
         "4. START reads. With 512K, swap SRC > DST > SRC > DST.",
         "5. Red 2/5/7? Read the clue, change the profile, NOCHMAL.",
         "   Red 6? NOCHMAL + timed SPACE, or try DOSCOPY+.",
-        "6. PRUEFEN verifies the result. DELIVER earns your fee.",
+        "6. V auto-verifies. PRUEFEN checks copy-only targets.",
         "7. NOCHMAL repeats. RAM caches images; external drives",
-        "   copy directly. Buy hardware as your business grows.",
-        "ENTER starts/swaps. SPACE retries. P pauses. H help.",
+        "   Click the VERIFIED status / ENTER to deliver the batch.",
+        "B market. TOOLS settings. ENTER start/swap. H help.",
         "SHIFT turbo. M music. S drive sounds. F11 fullscreen.",
     }
     for i,text in ipairs(lines) do UI.text(text,84,181+(i-1)*25,8,i==11 and "yellow" or "cyan",585) end
@@ -136,9 +156,9 @@ end
 function Overlay.credits(app)
     header("THE SOUND OF COPYING")
     line("X-COPY PROFESSIONAL 1992: CPL / ORIGINAL AUTHORS",193,"white")
-    line("Original header retained. Live controls are drawn at native resolution.",226)
+    line("Original complete bitmap with interactive controls and live results.",226)
     line("SUCCESS MARK: GREEN ZERO (X-COPY SHRINE ERROR REFERENCE)",269,"green")
-    line("DRIVE AUDIO: ORIGINAL UAE A500 SAMPLE RECORDINGS",308,"white")
+    line("A500 DRIVE AUDIO + A600 INSERT / EJECT (ASIE / CC0)",308,"white")
     line("MUSIC: ADVENTURE BEGINS LOOP / HOLIZNA / CC0",347,"white")
     UI.text("Full asset sources and licenses are in docs/ASSETS.md.\nAll market software and protection puzzles are imaginary.\nBusiness progress is saved; active copying restarts on relaunch.",84,390,8,"cyan",580)
     UI.button("BACK",84,505,580,"close")

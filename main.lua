@@ -33,14 +33,13 @@ end
 function love.draw()
     local mx,my=UI.mouse(love.mouse.getPosition())
     UI.begin(mx,my)
-    love.graphics.clear(0.01,0.025,0.03)
+    love.graphics.clear(0,0,0)
     local scale,x,y=UI.transform()
     love.graphics.push(); love.graphics.translate(x,y); love.graphics.scale(scale)
     UI.rect(0,0,UI.W,UI.H,"black")
     skin:draw(app.game,app.settings,clock)
     Overlay.draw(app)
-    UI.rect(64,565,628,1,"dim")
-    UI.text(app.page and app.game.message or (UI.tip or "CLICK THE CONTROLS. READ > WRITE > VERIFY > DELIVER. BUILD YOUR BUSINESS."),64,577,7,"cyan",628)
+    if app.page then UI.text(app.game.message,64,561,7,"cyan",628) end
     love.graphics.pop()
     love.mouse.setCursor(UI.hit(mx,my) and UI.hand or UI.arrow)
 end

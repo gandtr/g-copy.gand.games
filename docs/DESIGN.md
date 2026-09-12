@@ -1,4 +1,4 @@
-# Track Rescue v2: a disk-copying business
+# Track Rescue v3: the original desk and parallel duplication
 
 The user expanded the original arcade prototype into a persistent copy desk:
 start with one drive and 512 KB, buy software masters, fulfil copying instructions,
@@ -15,8 +15,14 @@ wrong checkmarks, sharpen the UI and make controls affect drive operations.
 - Read, swap, write, block and verify are separate states. One drive requires
   alternating media. A separate source/target in DISK mode streams directly.
   RAM mode stages the image. Completed images can be cached if they fit.
-- One selected source and one selected target per operation. All purchased bays
-  are real selectable routes. Concurrent writes to several targets are deferred.
+- One source, up to three independent external targets. Capture target modes at
+  START. Each destination owns its track results, loaded blank and verification
+  result. Broadcast each successful read/write to all active targets. RAM batches
+  reuse the same destination blanks; NOCHMAL always requires fresh blanks.
+- OFF / COPY / V bulbs are independent. V starts automatic verification after the
+  write completes. Mixed batches wait for manual PRUEFEN on COPY targets. Deliver
+  only after the entire batch passes, paying and reducing demand per disk. Reject
+  too many targets for current stock/demand before resetting an operation.
 - Use exact destination track-set equality against the customer's manifest. Extra
   tracks are as incorrect as missing tracks. Verify before payment; pay once.
 - NOCHMAL retries a blocked track or repeats a completed master with current
@@ -30,9 +36,13 @@ wrong checkmarks, sharpen the UI and make controls affect drive operations.
 - Persist cash, RAM, drives, blanks, purchases, customer delivery counts and total
   deliveries. Save audio preferences alongside them. Do not serialize an in-flight
   operation; a relaunch loads the selected master back at the idle desk.
-- Native framebuffer rendering + HiDPI + larger font rasterization improves live
-  controls; retain the original raster header. Draw hollow zeros instead of ticks
-  or a font's slashed-zero glyph. Do not invent detail in the historical header.
+- Use the complete original bitmap with transparent hit regions. Overlay only
+  live settings, status, bulb states, time and track results. Preserve original
+  German controls and black margins; put business features in TOOLS pop-ups.
+  Nearest filtering and physical-pixel scaling preserve the original raster.
+- Use the original V sprite from the screenshot, not a replacement letter.
+- Emit accepted media changes with previous/new media so the audio layer queues
+  real A600 eject then insert recordings. Mute cancels the media queue.
 
 ## Architecture
 

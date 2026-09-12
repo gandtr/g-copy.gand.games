@@ -2,6 +2,18 @@
 local Demo={}
 function Demo.setup(app,mode)
     local g=app.game
+    if mode=="classic" then app.page=nil; return end
+    if mode=="multi" or mode=="multi_complete" then
+        g.profile.drives=4; g.profile.completed=8; g.profile.money=400
+        g:buyMaster("castle"); g:setConfig("mode","NIBBLE"); g:setConfig("length","LONG")
+        for d=1,3 do g:setDrive("target",d); g:setDrive("target",d) end
+        app.page=nil; g:start(); g.faults={}
+        for _=1,500 do
+            if g.phase=="complete" or (mode=="multi" and g.position>90) then break end
+            if g.phase=="swap" then g:loadMedia(g.swapDrive,g.swapMedia) else g:update(0.1,false) end
+        end
+        return
+    end
     if mode=="market" then return end
     if mode=="hardware" then app.marketTab="hardware"; return end
     if mode=="protection" or mode=="retry" then

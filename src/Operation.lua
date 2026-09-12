@@ -14,7 +14,10 @@ function Game:beginCopy(useCache)
     if not self.job then return self:notice("NO MASTER DISK. VISIT THE MARKET FIRST.") end
     if self:remaining()==0 then return self:notice("THIS CUSTOMER HAS ALL THEIR COPIES. FIND A NEW ORDER AT MARKET.") end
     if self.config.first>self.config.last then return self:notice("START TRACK MUST NOT BE GREATER THAN END TRACK.") end
-    if self.profile.blanks<=0 then return self:notice("NO BLANKS. BUY A FIVE-PACK FOR $6 AT THE MARKET.") end
+    local batch=self:selectedTargets()
+    if #batch==0 then return self:notice("SELECT A TARGET: CLICK A LOWER BULB. CLICK AGAIN FOR V.") end
+    if #batch>self:remaining() then return self:notice("MORE TARGETS THAN COPIES ORDERED. SWITCH OFF A LOWER BULB.") end
+    if #batch>self.profile.blanks then return self:notice("NEED "..#batch.." BLANKS FOR THIS BATCH. VISIT THE MARKET.") end
     local queue=self:buildQueue()
     local signature=table.concat(queue,",")..self.job.id..self.config.mode..self.config.sync..self.config.length
     local cached=useCache and self.cache==signature
@@ -23,9 +26,11 @@ function Game:beginCopy(useCache)
     self.position,self.writePosition,self.cursor,self.copyClock=1,1,0,0
     self.accumulator,self.heat,self.stall,self.time=0,0,0,0
     self.health,self.combo,self.swaps,self.score=5,0,0,0
-    self.blankInUse,self.verified,self.paid,self.paused=false,false,false,false
+    self.verified,self.paid,self.paused=false,false,false
+    self.batch,self.copies=batch,{}
+    for _,drive in ipairs(batch) do self.copies[drive]={mode=self.targets[drive],tracks={},loaded=false,verified=false} end
     self.repair,self.selected=nil,nil
-    self.dual=self.source~=self.target and self.config.device=="DISK"
+    self.dual=not self.copies[self.source] and self.config.device=="DISK"
     for i=1,160 do self.tracks[i]="skip" end
     for _,index in ipairs(queue) do self.tracks[index]="empty" end
     for n=1,self.job.faults do
@@ -35,16 +40,30 @@ function Game:beginCopy(useCache)
     if cached then
         for _,index in ipairs(queue) do self.buffer[#self.buffer+1]=index; self.tracks[index]="buffer" end
         self.position=#queue+1
-        self:requestSwap("blank",self.target,"writing")
+        self:ensureTargets("writing")
         self.message="CACHED IMAGE READY. INSERT A FRESH BLANK TO REPEAT."
     else
         self.cache=nil
         self.phase=self.dual and "copying" or "reading"
         if self.slots[self.source]~="source" then self:requestSwap("source",self.source,self.phase)
-        elseif self.dual then self:requestSwap("blank",self.target,"copying")
+        elseif self.dual then self:ensureTargets("copying")
         else self.message="READING MASTER INTO "..(self.profile.ram-64).." KB USABLE RAM." end
     end
     self:emit("startup"); return true
+end
+-- Each destination owns a separate physical blank. Direct copies broadcast each
+-- source track once; RAM copies broadcast each buffered track when it is written.
+function Game:ensureTargets(after)
+    for _,drive in ipairs(self.batch) do
+        if not self.copies[drive].loaded or self.slots[drive]~="blank" then
+            self:requestSwap("blank",drive,after); return false
+        end
+    end
+    self.phase=after; return true
+end
+function Game:writeDestinations(index)
+    self.tracks[index]="good"
+    for _,drive in ipairs(self.batch) do self.copies[drive].tracks[index]="good" end
 end
 function Game:start()
     if self.paused then self.paused=false; return true end
@@ -109,23 +128,24 @@ function Game:readTrack()
         else self:block(index,"6","CHECKSUM ERROR 6. NOCHMAL / SPACE TO CALIBRATE THE HEAD."); return end
     end
     self.position=self.position+1; self.image[#self.image+1]=index
-    if self.dual then self.tracks[index]="good"
+    if self.dual then self:writeDestinations(index)
     else self.tracks[index]="buffer"; self.buffer[#self.buffer+1]=index end
     self:emit("track")
     if self.dual and self.position>#self.queue then self:copyFinished()
     elseif not self.dual and (#self.buffer>=self:capacity() or self.position>#self.queue) then
         self.writePosition=1
-        self:requestSwap("blank",self.target,"writing")
+        self:ensureTargets("writing")
     end
 end
 function Game:writeTrack()
     local index=self.buffer[self.writePosition]
     if not index then return end
-    self.cursor=index; self.tracks[index]="good"; self.writePosition=self.writePosition+1; self:emit("track")
+    self.cursor=index; self:writeDestinations(index); self.writePosition=self.writePosition+1; self:emit("track")
     if self.writePosition>#self.buffer then
         self.buffer={}; self.writePosition=1
         if self.position>#self.queue then self:copyFinished()
-        else self:requestSwap("source",self.source,"reading") end
+        elseif self.slots[self.source]~="source" then self:requestSwap("source",self.source,"reading")
+        else self.phase="reading" end
     end
 end
 function Game:copyFinished()
@@ -133,8 +153,11 @@ function Game:copyFinished()
     if self:capacity()>=#self.queue then
         self.cache=table.concat(self.queue,",")..self.job.id..self.config.mode..self.config.sync..self.config.length
     end
-    self.message="COPY FINISHED. CLICK PRUEFEN / CHECKDISK TO VERIFY BEFORE DELIVERY."
+    self.message=#self.batch.." COPIES WRITTEN. PRUEFEN VERIFIES THE TARGETS."
     self:emit("disk")
+    local automatic={}
+    for _,drive in ipairs(self.batch) do if self.copies[drive].mode==2 then automatic[#automatic+1]=drive end end
+    if #automatic>0 then self:beginVerify(automatic,true) end
 end
 function Game:verify()
     if self.phase=="blocked" then
@@ -142,31 +165,42 @@ function Game:verify()
         return self:notice(message or "ERROR 6: USE DOSCOPY+ OR NOCHMAL TO CALIBRATE THE READ HEAD.")
     end
     if self.phase~="complete" then return self:notice("CHECKDISK NEEDS A FINISHED COPY. DISK INFO SHOWS THE ORDER.") end
+    return self:beginVerify(self.batch,false)
+end
+function Game:beginVerify(targets,automatic)
     self.phase,self.verifyPosition,self.copyClock="verifying",1,0
-    self.message="VERIFYING DESTINATION AGAINST THE CUSTOMER'S TRACK MANIFEST."
+    self.verifyingTargets=targets
+    self.message=(automatic and "V: AUTOMATICALLY VERIFYING " or "VERIFYING ")..#targets.." TARGET(S)."
     self:emit("startup"); return true
 end
 function Game:verifyFinished()
     self.phase="complete"
-    for i=1,160 do
-        local track,side=indexTrack(i),i<=80 and "UPPER" or "LOWER"
-        local needed=track>=self.job.first and track<=self.job.last and (self.job.side=="BOTH" or self.job.side==side)
-        if (self.tracks[i]=="good")~=needed then
-            self.verified=false
-            return self:notice("ORDER MISMATCH: CHECK START / END / SIDE IN DISK INFO. REPEAT THE COPY.")
+    local mismatch=false
+    for _,drive in ipairs(self.verifyingTargets) do
+        local copy=self.copies[drive]; copy.verified=true
+        for i=1,160 do
+            local track,side=indexTrack(i),i<=80 and "UPPER" or "LOWER"
+            local needed=track>=self.job.first and track<=self.job.last and (self.job.side=="BOTH" or self.job.side==side)
+            if (copy.tracks[i]=="good")~=needed then copy.verified=false; mismatch=true end
         end
     end
-    self.verified=true; self.message="VERIFIED! DELIVER FOR $"..self.job.pay.." OR USE NOCHMAL AFTER DELIVERY."
+    local count=0
+    for _,drive in ipairs(self.batch) do if self.copies[drive].verified then count=count+1 end end
+    self.verified=count==#self.batch
+    if mismatch then return self:notice("ORDER MISMATCH: CHECK START / END / SIDE IN DISK INFO. REPEAT THE COPY.") end
+    self.message=self.verified and "VERIFIED! CLICK THIS MESSAGE / ENTER TO DELIVER FOR $"..self:payout().."."
+        or count.."/"..#self.batch.." VERIFIED. PRUEFEN CHECKS THE COPY-ONLY TARGETS."
     self:emit("disk")
 end
+function Game:payout() return self.job and self.job.pay*#self.batch or 0 end
 function Game:deliver()
     if self.phase~="complete" or not self.verified or self.paid then return self:notice("FINISH AND VERIFY THIS COPY BEFORE DELIVERY.") end
-    if self:remaining()<=0 then return false end
+    if self:remaining()<#self.batch or #self.batch==0 then return false end
     local p=self.profile
-    p.money=p.money+self.job.pay; p.completed=p.completed+1
-    p.delivered[self.job.id]=(p.delivered[self.job.id] or 0)+1
+    p.money=p.money+self:payout(); p.completed=p.completed+#self.batch
+    p.delivered[self.job.id]=(p.delivered[self.job.id] or 0)+#self.batch
     self.paid,self.phase=true,"delivered"
-    self.message="PAID $"..self.job.pay..". "..self:remaining().." COPIES STILL ORDERED. MARKET HAS NEW STOCK."
+    self.message="PAID $"..self:payout().." FOR "..#self.batch.." COPIES. "..self:remaining().." STILL ORDERED."
     self:emit("save"); self:emit("win"); return true
 end
 function Game:step(dt, boost)
@@ -185,6 +219,7 @@ function Game:step(dt, boost)
         if self.phase=="reading" or self.phase=="copying" then self:readTrack()
         elseif self.phase=="writing" then self:writeTrack()
         elseif self.phase=="verifying" then
+            self.cursor=self.queue[self.verifyPosition]
             self.verifyPosition=self.verifyPosition+1
             if self.verifyPosition>#self.queue then self:verifyFinished() end
         else break end

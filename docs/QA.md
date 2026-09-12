@@ -1,56 +1,56 @@
-# Verification — business build v2, 2026-09-13
+# Verification — original desk and parallel copies, 2026-09-13
 
 Tested on macOS with LÖVE 11.5 and LuaJIT.
 
 ## Rules and integration
 
-`luajit tests/run.lua`: **38 passed, 0 failed**.
+`luajit tests/run.lua`: **49 passed, 0 failed**.
 
-Covers starting resources, affordable first master, exact memory capacity, read vs
-write states, 512 KB three-swap copying, 1 MB one-swap copying, long-track capacity,
-external routes, source/destination media validation, one blank per multi-batch
-copy, routing/config locks, range checks, side selection, customer-manifest
-verification, single payment, finite/renewed orders, cached NOCHMAL, custom-header
-and sync/length gates, weak reads, DOSCOPY+ behavior, failed calibration, purchases,
-unlocks/upgrades, pause, motor heat, 30/144 Hz agreement, serialization/migration,
-malformed save values, click dispatch, and completing all nine fictional jobs.
+Covers the existing nine-order business loop, protection puzzles, RAM capacity,
+single-drive swaps, external routing, cached repeats, purchases, saves and pause.
+New coverage exercises the OFF/COPY/V cycle; a real auto-verification phase and
+pause; two- and three-target copies; mixed COPY/V batches; per-destination manifest
+checks; insufficient blanks/demand; no selected targets; source/target exclusions;
+parallel writes from RAM; fresh blanks for cached repeats; per-copy batch payment;
+and accepted/invalid media audio events.
 
 `XCOPY_SMOKE=1 LOVE_SHOT=1 love .`: **passed** with actual LÖVE graphics/audio.
 
-The test clicks controls from their rendered bounds, buys a master, opens its
-instructions, types a start track, changes side/mode, resets parameters, starts,
-completes every prompted media swap, verifies/sells a copy, uses NOCHMAL, buys RAM
-and an external drive, opens that bay/tools/info, and checks music/SFX switches.
-Audio sources loaded: the original chiptune loop and short A500 recording excerpts.
-No test/demo writes to the user's business save.
+The test clicks rendered controls, types a range, finishes a single-drive order,
+swaps, verifies, delivers, repeats, purchases hardware and navigates the tools.
+It then clicks two external bulbs twice, starts, inserts both blanks, waits for
+automatic verification and delivers both copies for $140. It also loads the real
+A600 samples, checks eject-before-insert playback and cancellation by SFX mute.
+Test/demo sessions never write the user's business save.
 
-## Visual checks
+## Original artwork and visual checks
 
-Native captures: **2160×1800 pixels**, for a 1080×900 point window with HiDPI.
-The previous build captured 1080×852 pixels and enlarged a 720×568 offscreen canvas.
-Live controls now draw directly into the native framebuffer; the historic header
-keeps its original pixels.
+`tests/SkinPixels.lua`, run inside the native smoke test, compares **385,906 pixels**
+against the original bitmap. Only live status and bulb rectangles are excluded.
+The logo, controls, German labels, bevels, arrows, floppy icons, grids and margins
+match. The three target bulb states are separately checked pixel-for-pixel against
+the exact source sprites, including the original orange V bulb.
 
-Inspected the market, full desk, numeric track editor, hardware shop, protection
-block, single-drive swap prompt and verified complete disk. Checked text/controls
-for clipping and overlaps. The final success marker is a small hollow green zero;
-original-program references show no checkmark and no diagonal stroke in the zero.
-All visible interactive controls register hit regions; modal panels own their
-regions so clicks do not activate covered controls.
+HiDPI captures are **2160×1800** physical pixels. Nearest-neighbour sampling and
+whole physical-pixel scaling preserve the historical raster; additional live
+characters use matching pixel geometry. Inspected the idle original desk, three
+verified external targets and hardware panel. The original status strip displays
+operation state and becomes the delivery action when the whole batch is verified.
+Business controls live in TOOLS panels. Original UI hit regions remain clickable;
+modal panels own their regions and block covered controls.
 
-## Scope and limits
+## Build and scope
 
-Each copy uses one selected source and one selected destination. Additional owned
-bays are selectable; concurrent multi-target duplication is not implemented.
-The economy is an initial playable balance, not validated by a broad human test.
-Business resources persist; in-flight copying restarts on relaunch. Originals,
-stock, money, upgrades and delivered orders stay saved. Protection rules and memory
-budgets are explicit game abstractions. No real disks are touched.
+The `.love` is checked for archive CRC integrity and byte equality with the source.
+A smoke test also runs against the packaged game. LÖVE is required to launch it.
+No remote push or public publishing is part of this local build.
 
-Original A500 recordings and the same CC0 music remain unchanged. Automated tests
-verify source loading/mute behavior; there was no separate headphone/speaker mix
-review this turn. The code's voice cap and short extracted clicks remain active.
+Each source track is broadcast to all selected targets, which own separate blank
+and verification state. Copy-only targets require manual PRUEFEN in a mixed batch;
+all targets must be verified before delivery. Active copies restart after quitting,
+while purchased masters, cash, stock, upgrades and delivered orders persist.
 
-The `.love` archive is verified for CRC integrity and source-byte equality by the
-build script. It requires the installed LÖVE runtime. No public release or remote
-repository push was made. Original artwork remains the temporary requested skin.
+Audio recordings are unchanged: UAE A500 motor/head sounds, new CC0 A600 insert
+and eject, and Holizna's CC0 chiptune. Automated loading/playback/mute checks passed;
+there was no separate headphone mix review. The original artwork is the temporary
+skin requested by the user. Fictional protection puzzles never touch real disks.

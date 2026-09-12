@@ -46,9 +46,9 @@ Catalog.upgrades = {
     {id="ram2048", label="+1 MB FAST RAM", cost=280, ram=2048, requiresRam=1024,
      note="Keep a full disk cached, including long-track images."},
     {id="drive3", label="EXTERNAL DF2:", cost=260, drives=3, requiresDrives=2,
-     note="Add another selectable source or destination drive."},
+     note="Copy to two external targets at once; set each to COPY or V."},
     {id="drive4", label="EXTERNAL DF3:", cost=360, drives=4, requiresDrives=3,
-     note="Complete the four-drive desk; route copies as you like."},
+     note="One source, three targets: duplicate and auto-verify a full batch."},
 }
 function Catalog.get(id)
     for _, job in ipairs(Catalog.jobs) do if job.id == id then return job end end

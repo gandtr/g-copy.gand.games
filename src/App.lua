@@ -35,7 +35,7 @@ function App:action(id,value,y)
     elseif id=="upgrade" then g:buyUpgrade(value)
     elseif id=="blanks" then g:buyBlanks()
     elseif id=="orders" then g:renewOrders()
-    elseif id=="info" or id=="help" or id=="tools" or id=="credits" or id=="range" then self:open(id)
+    elseif id=="info" or id=="help" or id=="tools" or id=="credits" or id=="range" or id=="status" then self:open(id)
     elseif id=="drive" then
         if value>=g.profile.drives then self.marketTab="hardware"; self:open("market")
         else self.driveIndex=value; self:open("drive") end
@@ -63,7 +63,7 @@ function App:action(id,value,y)
     elseif id=="format" then
         if g:busy() or g.phase=="verifying" then g:notice("ABORT OR FINISH COPYING BEFORE FORMATTING.")
         else
-            g:abort(); g.slots[g.target]="blank"
+            g:abort(); for _,drive in ipairs(g:selectedTargets()) do g.slots[drive]="blank" end
             for i=1,160 do g.tracks[i]="empty" end
             g.message="TARGET FORMATTED. PREVIOUS COPY CLEARED. READY FOR A NEW WRITE."
             self.page=nil

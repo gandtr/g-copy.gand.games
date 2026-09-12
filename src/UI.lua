@@ -1,4 +1,4 @@
-local UI={W=720,H=600,regions={}}
+local UI={W=720,H=584,regions={}}
 UI.colors={black={0,0,0},cyan={0.35,0.78,0.82},dark={0.025,0.10,0.12},dim={0.23,0.4,0.42},
  white={0.9,0.97,0.96},green={0.05,1,0},yellow={1,0.9,0},red={1,0.22,0.12},purple={0.2,0,0.3}}
 function UI.init()
@@ -61,6 +61,9 @@ function UI.hit(x,y)
 end
 function UI.transform()
     local w,h=love.graphics.getDimensions(); local scale=math.min(w/UI.W,h/UI.H)
+    -- Snap to whole physical pixels on Retina as well as standard displays.
+    local dpi=love.window.getDPIScale()
+    if scale*dpi>=1 then scale=math.floor(scale*dpi)/dpi end
     return scale,math.floor((w-UI.W*scale)/2),math.floor((h-UI.H*scale)/2)
 end
 function UI.mouse(x,y) local s,ox,oy=UI.transform(); return (x-ox)/s,(y-oy)/s end

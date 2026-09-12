@@ -17,7 +17,7 @@ Music archive: https://opengameart.org/sites/default/files/happy_chiptunes.zip
 
 CC0 legal text: https://creativecommons.org/publicdomain/zero/1.0/legalcode
 
-The music's CC0 status does not apply to the X-Copy artwork or drive recordings.
+The CC0 status of the music and A600 media recordings does not apply to the X-Copy artwork or UAE A500 recordings.
 The original X-Copy disk/application executable is not included.
 
 ## v2 original-mark verification and resolution changes
@@ -33,3 +33,18 @@ The downloaded 1992 screen file is still unchanged. v2 draws its header as a qua
 and reconstructs the live controls, drive bays and grids in code at native window
 resolution. HiDPI is enabled. This does not add detail to the historic raster header.
 No new music or drive recordings were added in v2.
+
+## v3 original screen and physical media sounds
+
+The full, unchanged `xcopy-1992.png` is drawn again, including the German controls,
+arrows, icons and grids. Dynamic game state is overlaid. All three target bulb
+states come from that bitmap: the source's yellow lit bulb is COPY, the orange
+original target bulb already contains V, and the pale cyan bulb is OFF. New business
+panels live behind TOOLS. Existing yellow field characters are sampled as quads;
+additional characters are rendered with matching 7x6 pixel geometry.
+
+`assets/audio/floppy_insert.ogg` and `floppy_eject.ogg` are unchanged files from
+[asie: Amiga 600 floppy drive sounds](https://opengameart.org/content/amiga-600-floppy-drive-sounds),
+licensed CC0. The author recorded the real Amiga 600 using an iPad in early 2014.
+Archive: https://opengameart.org/sites/default/files/amiga_600_floppy_sounds.zip
+Only the insert/eject files are included; the original OGG bytes are preserved.

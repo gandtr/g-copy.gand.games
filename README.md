@@ -30,7 +30,9 @@ reads, copies or modifies your real drives or software.
 4. Click the insertion prompt or press Enter at each swap. A destination is reused
    for the second write batch; only one blank disk is consumed per finished copy.
    Green zeros indicate tracks written to the destination.
-5. Click **PRUEFEN / CHECKDISK** to verify. Then click **DELIVER** to receive $70.
+5. Click **PRUEFEN / CHECKDISK** to verify, or click the already-lit target bulb
+   once before START to mark it **V** for automatic verification. Click the
+   **VERIFIED status message** or press Enter to deliver and receive $70.
 6. **NOCHMAL** makes another copy for the same customer. The first customer orders
    two copies. Buy new masters as your reputation unlocks them, or use **NEW ORDERS**
    in the market to renew sold-out titles already on your shelf.
@@ -47,10 +49,10 @@ handling media, recovering weak reads and improving your setup.
 | START / END track values | Click the value and type 00-79; Enter applies it. +/- adjusts by one; the range panel also has +/-10 |
 | SIDE | BOTH, UPPER or LOWER; changes the actual side-tracks copied |
 | SYNC | 4489, A245 or 8914; required by some protection puzzles |
-| LENGTH | NORMAL or LONG; affects long-track reads and buffer capacity |
-| DISK / RAM button below the grids | DISK streams between separate drives; RAM stages the copy through the buffer |
+| TOOLS > TRACK RANGE > TRACK LENGTH | NORMAL or LONG; affects long-track reads and buffer capacity |
+| UEBER / DISK / RAM (original upper-right field) | DISK streams between separate drives; RAM stages the copy through the buffer |
 | Top bulb above a drive | Select source drive |
-| Bottom bulb below a drive | Select destination drive |
+| Bottom bulb below a drive | OFF → lit COPY bulb → original orange V bulb → OFF. Each destination cycles independently |
 | Drive picture | Insert master, insert destination, eject or select its role; disconnected drives open the hardware shop |
 | START | Start, resume, retry a blocked operation or confirm a requested swap |
 | NOCHMAL | Retry a blocked read or repeat the current master; reuse a complete cached image when possible |
@@ -59,19 +61,33 @@ handling media, recovering weak reads and improving your setup.
 | INHALT | Purchased master collection |
 | PRUEFEN | Verify a finished copy or diagnose the current blocked track |
 | ZURUECK | Restore standard copy settings |
-| TOOLS | Verify, retry, disk information, format target, abort, help and credits |
+| TOOLS | Market, hardware, track length, buffer settings, verify, retry, disk information, format, abort, status, help, credits and audio |
 | Track grid cell | Inspect its state, or retry the currently blocked track |
 | Original header/logo | Credits |
 | MARKET / tabs / cards | Buy masters, hardware, blanks; load owned masters; renew sold-out orders |
-| DELIVER | Collect payment once for the verified, matching copy |
-| TURBO | Hold to accelerate; release to cool the motor |
-| MUSIC / DRIVES | Independent audio switches |
+| VERIFIED status message / Enter | Deliver all verified matching copies in the batch; each pays once |
+| Shift | Hold to accelerate; release to cool the motor |
+| TOOLS > MUSIC / SFX | Independent audio switches |
 
 Operations lock routing and track-range changes while data is in flight. Mode,
 sync and length can be corrected at a blocked track; NOCHMAL resumes it. To restart
-with a different range, use TOOLS > ABORT or finish and repeat. Each copy has one
-selected source and one selected destination; DF0 through DF3 can be selected once
-purchased. Multiple simultaneous destination writes are not part of this build.
+with a different range, use TOOLS > ABORT or finish and repeat.
+
+Select one source and up to three external targets. Each source track is read once
+and written to every selected destination in parallel. Each target needs one blank
+and one remaining customer order. START rejects a batch if either is insufficient,
+without spending any blanks. Media prompts load the destinations in drive order.
+
+Click an unlit target bulb once for **COPY**, twice for **V**, three times to switch
+it off. V starts a real verification pass as soon as copying finishes. In a mixed
+COPY/V batch, only V targets verify automatically; PRUEFEN checks the rest. All
+copies must match the order and pass verification before the batch can be delivered.
+Click a drive to inspect its verification status. Selecting an external target turns
+off the source drive's target role; selecting the source as target returns to a
+single-drive swap operation. Installed new drives start with their target bulb off.
+
+The original desk is restored in full. Open the market through **TOOLS > MARKET**
+or **B**; click the green status strip for the operation report and business totals.
 
 Keyboard: **Enter** starts/swaps/delivers; **Space/R** retries or repeats; **P**
 pauses; **V** verifies; **B** market; **I** disk info; **H** help; **C** credits;
@@ -92,7 +108,7 @@ custom sync words, long tracks and weak reads. For example:
 
 Red **2** indicates a sync problem, **5** a custom-header problem, **6** a weak
 checksum read and **7** a long track in these game puzzles. On error 6, NOCHMAL opens
-calibration: press Space in green; the white centre gives a perfect. Five missed
+calibration: press Space in green; hitting near the centre gives a perfect. Five missed
 calibrations fail that attempt. DOSCOPY+ handles weak reads automatically at a
 slower speed; it does not solve custom headers or sync/length problems by itself.
 These are game abstractions, not instructions for a real copier or real protection.
@@ -103,7 +119,7 @@ These are game abstractions, not instructions for a real copier or real protecti
   needs one destination insertion, and NOCHMAL can reuse the cached image.
 - Long tracks use more buffer space; 2 MB RAM can retain a complete long-track image.
 - DF1 enables direct source-to-destination copying, with no alternating media swaps.
-  DF2 and DF3 add other selectable source/destination bays.
+  DF2 and DF3 enable two and three simultaneous target copies.
 - Masters are purchased once; every delivered copy has a customer payment. Blank
   five-packs cost $6. NEW ORDERS renews sold-out owned titles without resetting
   lifetime deliveries or charging for the master again.
@@ -118,14 +134,21 @@ orders remain saved. A blank already inserted into an interrupted copy remains u
 
 Success marks are hollow **green zeros**, verified against the X-Copy Shrine's
 error reference and a photograph of the original completed-copy screen. The
-original 1992 header is retained. The control surface, grids and text render into
-the window's native framebuffer with HiDPI enabled and fonts rasterized at triple
-logical size. The old 720px offscreen-canvas scaling is removed. The raster header
-retains its original pixel detail; it is not an AI-upscaled image.
+**complete original 1992 bitmap** supplies the logo, German labels, borders,
+arrows, floppy icons, grids and black margins. Transparent hit regions keep the
+original artwork clickable. Live settings and results are overlaid in place.
+The source bitmap also supplies the OFF, lit COPY and orange V bulb sprites.
+Existing yellow glyphs are sampled from the original; additional characters use
+matching pixel geometry. New market and game dialogs remain separate pop-ups.
+HiDPI and nearest-neighbour scaling keep source pixels crisp at whole physical
+pixel multiples. This preserves historical pixel detail rather than inventing it.
 
-UAE A500 drive recordings and Holizna's public-domain CC0 **Adventure Begins Loop**
-remain bundled. See [asset provenance](docs/ASSETS.md) for the original-art status
-and individual licenses.
+Disk swaps now play actual **Amiga 600 ejection and insertion recordings**, by
+asie, CC0, in sequence. Empty-drive insertion plays only the insert; eject plays
+only the eject. Invalid media actions remain silent. SFX mute cancels queued sounds;
+the music and motor duck while the media mechanism plays. The original UAE A500
+motor/head recordings and Holizna's CC0 **Adventure Begins Loop** remain bundled.
+See [asset provenance](docs/ASSETS.md) for sources and individual licenses.
 
 ## Develop and verify
 
@@ -136,13 +159,15 @@ XCOPY_DEMO=complete LOVE_SHOT=1 love .
 python3 scripts/build.py
 ```
 
-38 deterministic tests cover memory, swaps, routing, verification, protection,
+49 deterministic tests cover memory, swaps, routing, verification, protection,
 economy, upgrades, repeat caching, saves, and all nine orders. The real LÖVE smoke
 test clicks rendered controls, types a range, completes/validates/sells a copy,
-repeats it, buys hardware, navigates drives/tools and tests audio switches.
+repeats it, buys hardware, selects multiple targets, auto-verifies and sells a batch,
+and checks the sequential insert/eject audio and mute behavior. A pixel test compares
+the static screen and all three bulb states against the original bitmap.
 
 Screenshot fixtures: `market`, `hardware`, `info`, `range`, `play`, `swap`,
-`protection`, `retry`, `complete`. `XCOPY_SEED` fixes the random calibration window.
+`protection`, `retry`, `complete`, `classic`, `multi`, `multi_complete`. `XCOPY_SEED` fixes the random calibration window.
 Test/demo sessions never write the user's business save.
 
 The build script creates a `.love` and macOS launcher in `dist/`, verifies archive
