@@ -1,0 +1,56 @@
+local Catalog = {}
+-- All software, publishers, clients and protection schemes are fictional.
+Catalog.jobs = {
+    {id="moon", title="MOON ORCHARD", kind="GAME / SOFT MOSS", cost=10, pay=70, demand=2, unlock=0,
+     first=0, last=79, side="BOTH", mode="DOSCOPY", sync="4489", length="NORMAL", faults=0,
+     brief="The club wants two working copies of this lunar farming game.",
+     note="Copy tracks 00-79, BOTH sides. Standard DOSCOPY is fine."},
+    {id="ledger", title="PIXEL LEDGER 2", kind="PROGRAM / SQUAREWARE", cost=14, pay=85, demand=2, unlock=1,
+     first=12, last=39, side="UPPER", mode="DOSCOPY", sync="4489", length="NORMAL", faults=0,
+     brief="An accountant only needs the invoice templates, not the full disk.",
+     note="Copy tracks 12-39, UPPER side ONLY. Other tracks invalidate the order."},
+    {id="reef", title="NEON REEF", kind="GAME / TIDAL BYTE", cost=22, pay=115, demand=2, unlock=2,
+     first=0, last=79, side="BOTH", mode="NIBBLE", sync="4489", length="NORMAL", protection=8, faults=1,
+     brief="A diver's arcade adventure. Its custom headers confuse DOSCOPY.",
+     note="Full disk. At track 08, use NIBBLE then NOCHMAL to read the header."},
+    {id="atlas", title="ASTRAL ATLAS", kind="PROGRAM / ORBIT HOUSE", cost=25, pay=140, demand=2, unlock=3,
+     first=20, last=59, side="LOWER", mode="DOSCOPY", sync="A245", length="NORMAL", protection=24, faults=0,
+     brief="The observatory ordered only the southern star charts.",
+     note="Tracks 20-59 LOWER. Track 24 uses sync A245. Change SYNC, then retry."},
+    {id="castle", title="CASTLE OF STATIC", kind="GAME / GHOST CIRCUIT", cost=32, pay=180, demand=3, unlock=4,
+     first=0, last=79, side="BOTH", mode="NIBBLE", sync="4489", length="LONG", protection=40, faults=1,
+     brief="The castle's final level lives on an unusually long track.",
+     note="Full disk. Use NIBBLE + LONG track length for the gate at track 40."},
+    {id="paint", title="PHOSPHOR PAINTER", kind="PROGRAM / GREEN ROOM", cost=26, pay=155, demand=2, unlock=5,
+     first=0, last=23, side="BOTH", mode="DOSCOPY", sync="4489", length="NORMAL", faults=2,
+     brief="A small art package on aging media. Rescue two weak sectors.",
+     note="Tracks 00-23 BOTH. Red 6 means a weak read: NOCHMAL opens calibration."},
+    {id="copper", title="COPPER COURIER", kind="GAME / RASTER POST", cost=40, pay=240, demand=3, unlock=6,
+     first=0, last=79, side="BOTH", mode="NIBBLE", sync="8914", length="LONG", protection=32, faults=1,
+     brief="Deliver letters across a city that changes every scanline.",
+     note="Full disk. Track 32 needs NIBBLE, sync 8914 and LONG track length."},
+    {id="wave", title="WAVE FOUNDRY", kind="PROGRAM / SAMPLE WORKS", cost=35, pay=210, demand=3, unlock=7,
+     first=32, last=71, side="UPPER", mode="DOSCOPY", sync="4489", length="NORMAL", faults=1,
+     brief="A musician wants the synth bank, without the demo songs.",
+     note="Tracks 32-71 UPPER only. Standard mode. Verify before delivery."},
+    {id="velvet", title="VELVET COMET", kind="GAME / MIDNIGHT LAB", cost=48, pay=290, demand=3, unlock=8,
+     first=0, last=79, side="BOTH", mode="NIBBLE", sync="A245", length="LONG", protection=67, faults=2,
+     brief="A space racer with a stubborn final track and two weak reads.",
+     note="Full disk. Track 67: NIBBLE / A245 / LONG. Calibrate any red 6."},
+}
+Catalog.upgrades = {
+    {id="ram1024", label="+512 KB RAM", cost=120, ram=1024, requiresRam=512,
+     note="960 KB usable: an entire standard disk fits in RAM."},
+    {id="drive2", label="EXTERNAL DF1:", cost=160, drives=2, requiresDrives=1,
+     note="Read DF0 to DF1 directly. No source/destination swaps."},
+    {id="ram2048", label="+1 MB FAST RAM", cost=280, ram=2048, requiresRam=1024,
+     note="Keep a full disk cached, including long-track images."},
+    {id="drive3", label="EXTERNAL DF2:", cost=260, drives=3, requiresDrives=2,
+     note="Add another selectable source or destination drive."},
+    {id="drive4", label="EXTERNAL DF3:", cost=360, drives=4, requiresDrives=3,
+     note="Complete the four-drive desk; route copies as you like."},
+}
+function Catalog.get(id)
+    for _, job in ipairs(Catalog.jobs) do if job.id == id then return job end end
+end
+return Catalog

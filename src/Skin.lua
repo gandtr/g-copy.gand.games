@@ -1,129 +1,144 @@
-local UI = require("src.UI")
-local Skin = {}
-Skin.__index = Skin
-local DISKS = {"DEMOSCENE VOL.01", "PIXEL ARCHIVE", "THE LAST BACKUP"}
-local TOOLTIP = {
-    "START / ENTER: SPIN UP OR RESUME", "REPEAT / SPACE: SELECT A FAULT, THEN TIME YOUR RETRY",
-    "STOP / P: PAUSE THE SHIFT", "DISK INFO / H: HOW TO PLAY",
-    "DIRECTORY / C: MUSIC AND ASSET CREDITS", "CHECK: SELECT THE NEXT BAD TRACK",
-    "DEFAULT: AUDIO SETTINGS",
+local UI=require("src.UI")
+local Skin={}; Skin.__index=Skin
+local BUTTONS={
+ {"START","start","Start / resume the configured disk operation"},
+ {"NOCHMAL","repeat","Retry a blocked read or copy this master again"},
+ {"STOP","pause","Pause / resume the drive motor"},
+ {"DISK INFO","info","Read the order, track range and protection clues"},
+ {"INHALT","directory","Browse your purchased master disks"},
+ {"PRUEFEN","verify","Verify the completed destination / diagnose an error"},
+ {"ZURUECK","defaults","Restore standard copying parameters"},
 }
-
 function Skin.new()
-    local self = setmetatable({}, Skin)
-    self.image = love.graphics.newImage("assets/visuals/xcopy-1992.png")
-    self.image:setFilter("nearest", "nearest")
-    self.onBulb = love.graphics.newQuad(82, 244, 32, 36, 720, 568)
-    self.offBulb = love.graphics.newQuad(146, 244, 32, 36, 720, 568)
+    local self=setmetatable({},Skin)
+    self.image=love.graphics.newImage("assets/visuals/xcopy-1992.png")
+    self.image:setFilter("nearest","nearest")
+    self.header=love.graphics.newQuad(64,32,628,88,720,568)
     return self
 end
-
 function Skin.trackPosition(index)
-    local side = math.floor((index - 1) / 80)
-    local n = (index - 1) % 80
-    return 338 + side * 188 + n % 10 * 16, 254 + math.floor(n / 10) * 16
+    local side=math.floor((index-1)/80); local n=(index-1)%80
+    return 338+side*188+n%10*16,254+math.floor(n/10)*16
 end
-
-function Skin.trackAt(x, y)
-    for i = 1, 160 do
-        local tx, ty = Skin.trackPosition(i)
-        if UI.contains(x, y, tx - 1, ty - 1, 16, 16) then return i end
-    end
+local function field(label,value,x,w,key)
+    UI.text(label,x,127,7,"cyan",w,"center")
+    local hover=UI.hot("field",x,123,w,61,key,"Change "..label.."; arrows adjust numeric tracks")
+    if hover then UI.rect(x,143,w,40,"dark") end
+    UI.text(tostring(value),x,158,key=="mode" and 11 or 10,"yellow",w,"center")
+    UI.text("+",x,144,7,"cyan",w,"center")
+    UI.text("-",x,177,7,"cyan",w,"center")
 end
-
-function Skin:tracks(game, clock, mx, my)
-    for i, state in ipairs(game.tracks) do
-        local x, y = Skin.trackPosition(i)
-        if state == "good" or state == "fixed" then
-            local color = state == "fixed" and "cyan" or "green"
-            UI.rect(x + 2, y + 5, 3, 4, color)
-            UI.rect(x + 5, y + 8, 3, 3, color)
-            UI.rect(x + 8, y + 3, 3, 6, color)
-            UI.rect(x + 11, y + 1, 2, 3, color)
-        elseif state == "bad" then
-            UI.rect(x + 1, y + 1, 13, 13, math.floor(clock * 3) % 2 == 0 and "red" or {0.65, 0.08, 0})
-            UI.text("!", x + 3, y + 3, 8, "black")
+function Skin:drive(game,index)
+    local x=74+index*64; local owned=index<game.profile.drives
+    local source=game.source==index; local target=game.target==index
+    for _,entry in ipairs({{y=244,role="source",on=source},{y=340,role="target",on=target}}) do
+        local hover=UI.hot("drive_role",x+9,entry.y,30,30,{role=entry.role,index=index},
+            owned and "Select DF"..index..": as "..entry.role or "Buy external DF"..index..": at the market")
+        UI.color(owned and (entry.on and "yellow" or "cyan") or "dim")
+        love.graphics.circle("fill",x+24,entry.y+10,6.5)
+        if owned then
+            UI.color(entry.on and "white" or "cyan"); love.graphics.circle("fill",x+22,entry.y+7,2.2)
         end
-        if i == game.selected then UI.outline(x, y, 15, 15, "yellow") end
-        if state == "bad" and UI.contains(mx, my, x, y, 16, 16) then UI.outline(x, y, 15, 15, "white") end
-        if i == game.cursor + 1 and game.phase == "copying" and not game.repair then
-            UI.outline(x + 1, y + 1, 13, 13, "white")
-        end
+        UI.rect(x+20,entry.y+17,8,4,owned and "cyan" or "dim")
+        UI.rect(x+21,entry.y+22,6,2,"dim")
+        UI.rect(x+21,entry.y+25,6,1,"cyan"); UI.rect(x+22,entry.y+27,4,1,"dim")
+        if hover then UI.outline(x+9,entry.y,30,30,"white") end
     end
+    local hover=UI.hot("drive",x,285,49,51,index,owned and "DF"..index..": insert/eject source or destination" or "Install this external drive")
+    UI.rect(x,285,49,51,owned and "cyan" or "dark"); UI.outline(x,285,49,51,hover and "yellow" or "dim")
+    UI.rect(x+4,287,41,26,"black"); UI.text("DRIVE",x+4,290,7,owned and "cyan" or "dim",41,"center")
+    UI.text(tostring(index),x,302,9,owned and "white" or "dim",49,"center")
+    if owned then
+        UI.rect(x,285,3,51,{0.12,0.1,0.85}); UI.rect(x+46,285,3,51,{0.12,0.1,0.85})
+        UI.rect(x+4,285,41,2,"yellow")
+        UI.rect(x+8,316,32,19,"dim"); UI.rect(x+10,316,10,19,"white")
+        UI.rect(x+12,318,5,14,"black"); UI.rect(x+23,316,13,19,"cyan")
+    else UI.rect(x+6,318,36,4,"dim") end
+    local media=game.slots[index]
+    UI.text(not owned and "BUY" or media=="source" and "SRC" or media=="blank" and "DST" or "---",x,owned and 373 or 327,6,
+        owned and "yellow" or "dim",49,"center")
 end
-
-function Skin:draw(game, settings, clock, mx, my)
-    UI.color("white"); love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(self.image)
-    UI.text("TRACK RESCUE  /  ARCADE DISK RECOVERY", 0, 10, 8, "cyan", 720, "center")
-    -- Original screen stays intact on disk; only changing fields are overlaid here.
-    UI.rect(73, 154, 171, 27, "black")
-    UI.text(game.turbo and "TURBOCOPY" or "DOSCOPY", 77, 159, 12, game.turbo and "red" or "yellow")
-    UI.rect(592, 157, 81, 19, "black")
-    UI.text("DISK " .. game.disk, 596, 160, 10, "yellow")
-    UI.rect(68, 222, 250, 13, "black")
-    UI.text("SOURCE  DF0:  " .. string.format("%02d", game.disk), 77, 225, 8, "cyan")
-    UI.rect(338, 221, 348, 13, "black")
-    UI.text("UPPER SIDE", 338, 225, 8, "cyan", 160, "center")
-    UI.text("LOWER SIDE", 526, 225, 8, "cyan", 160, "center")
-    for drive = 0, 3 do
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.draw(self.image, drive == game.disk and self.onBulb or self.offBulb, 82 + drive * 64, 340)
+function Skin:tracks(game)
+    UI.text("UPPER SIDE",338,225,8,"cyan",160,"center")
+    UI.text("LOWER SIDE",526,225,8,"cyan",160,"center")
+    for side=0,1 do
+        local left=336+side*188
+        for c=0,9 do UI.text(tostring(c),left+5+c*16,240,8,"cyan") end
+        for r=0,7 do UI.text(tostring(r),left-10,258+r*16,8,"cyan") end
+        UI.outline(left,252,162,130,"cyan")
+        for c=1,9 do UI.rect(left+c*16,252,0.65,130,"dim") end
+        for r=1,7 do UI.rect(left,252+r*16,162,0.65,"dim") end
     end
-    self:tracks(game, clock, mx, my)
-    UI.rect(342, 384, 151, 10, "black")
-    UI.text(string.format("TRACKS:%03d/160", game.cursor), 343, 385, 7, "cyan")
-    UI.rect(545, 383, 137, 11, "black")
-    UI.text(string.format("TIME:%02d:%02d", math.floor(game.time / 60), math.floor(game.time) % 60), 548, 385, 8,
-        game.time < 20 and "red" or "cyan")
-    UI.rect(64, 407, 628, 19, "black")
-    local message = game.message
-    if game.stall > 0 then message = "DRIVE COOLING... " .. string.format("%.1fs", game.stall) end
-    UI.text(message, 74, 413, 8, game.health < 2 and "red" or "green")
-    self:console(game, settings, clock, mx, my)
+    for i,state in ipairs(game.tracks) do
+        local x,y=Skin.trackPosition(i)
+        if state=="good" then UI.zero(x+4,y+2,"green")
+        elseif state=="buffer" then UI.zero(x+4,y+2,"yellow")
+        elseif tonumber(state) then UI.text(state,x+2,y+2,11,"red")
+        elseif state=="skip" then UI.rect(x+6,y+7,3,1,"dim") end
+        if UI.hot("track",x,y,15,15,i,"Track "..string.format("%02d",(i-1)%80)..(i<=80 and " upper" or " lower")..": "..state) then
+            UI.outline(x,y,15,15,"white")
+        elseif i==game.selected and game.phase=="blocked" then UI.outline(x,y,15,15,"yellow")
+        elseif i==game.cursor and game:busy() then UI.outline(x,y,15,15,"cyan") end
+    end
+    UI.text("GREEN 0 = WRITTEN",338,385,7,"green")
+    UI.text(string.format("TIME %02d:%02d",math.floor(game.time/60),math.floor(game.time)%60),534,385,8,"cyan")
 end
-
-function Skin:console(game, settings, clock, mx, my)
-    UI.text(string.format("DISK %d/3", game.disk), 64, 449, 8, "white")
-    UI.text(DISKS[game.disk], 156, 449, 8, "cyan")
-    UI.text(string.format("SCORE %06d", game.score), 373, 449, 8, "yellow")
-    UI.text("CHAIN X" .. game.combo, 570, 449, 8, "green")
-    UI.rect(64, 466, 628, 1, "dim")
-    UI.text("INTEGRITY", 64, 477, 7, "cyan")
-    for i = 1, 5 do UI.rect(139 + i * 13, 475, 9, 10, i <= game.health and "green" or "dim") end
-    UI.text("HEAT", 254, 477, 7, "cyan")
-    UI.outline(293, 475, 104, 10, "dim")
-    UI.rect(295, 477, game.heat, 6, game.heat > 75 and "red" or "yellow")
-    UI.text("FAULTS " .. #game:badTracks(), 428, 477, 7, #game:badTracks() > 0 and "red" or "cyan")
-    UI.button("HOLD: TURBO", 561, 471, 131, game.turbo or UI.contains(mx, my, 561, 471, 131, 19))
+function Skin:draw(game,settings,clock)
+    love.graphics.setColor(1,1,1); love.graphics.draw(self.image,self.header,64,32)
+    UI.hot("credits",64,32,628,86,nil,"X-Copy credits / sound and original art")
+    UI.text("TRACK RESCUE  /  THE FLOPPY DISK BUSINESS",0,10,8,"cyan",720,"center")
+    UI.outline(64,119,624,74,"cyan"); UI.rect(69,139,613,1,"dim")
+    field("",game.config.mode,74,158,"mode")
+    UI.text("COPY",78,127,7,"cyan")
+    UI.hot("tools",148,121,71,19,nil,"TOOLS: inspect, retry, format, abort and audio")
+    UI.rect(149,123,70,14,"black"); UI.text("TOOLS",150,127,7,"cyan",67,"center")
+    field("START",string.format("%02d",game.config.first),247,50,"first")
+    field("END",string.format("%02d",game.config.last),323,50,"last")
+    field("SIDE",game.config.side,408,82,"side")
+    field("SYNC",game.config.sync,505,75,"sync")
+    field("LENGTH",game.config.length,593,85,"length")
+    for i,button in ipairs(BUTTONS) do UI.button(button[1],77+(i-1)*86,194,82,button[2],nil,button[3]) end
+    UI.text("SOURCE DRIVE",74,225,8,"cyan",240,"center")
+    for i=0,3 do self:drive(game,i) end
+    UI.text("TARGET DRIVE",74,384,8,"cyan",240,"center")
+    self:tracks(game)
+    UI.panel(59,402,638,32)
+    UI.text(game.message,70,413,7,game.phase=="blocked" and "red" or "green",616)
+    self:console(game,settings)
+end
+function Skin:console(game,settings)
+    local p=game.profile
+    UI.text("$"..p.money,64,448,12,"yellow")
+    UI.text(p.ram.." KB RAM",176,450,8,"cyan")
+    UI.text(p.drives.." DRIVE"..(p.drives==1 and "" or "S"),330,450,8,"cyan")
+    UI.text(p.blanks.." BLANKS",480,450,8,"cyan")
+    UI.button("MARKET",602,442,90,"market",nil,"Buy masters, blank disks and hardware upgrades")
+    UI.rect(64,470,628,0.8,"dim")
+    UI.text(game.job and game.job.title or "NO MASTER LOADED",64,482,9,"white")
+    UI.text("STATE: "..game.phase:upper(),376,484,7,"cyan")
+    UI.button(game.config.device,612,476,80,"device",nil,"DISK = direct copy with two drives; RAM = staged image buffer")
+    UI.text("BUFFER",64,507,7,"cyan")
+    UI.outline(118,503,204,10,"dim"); UI.rect(120,505,math.min(200,#game.buffer/math.max(1,game:capacity())*200),6,"yellow")
+    UI.text(math.ceil(#game.buffer*(game.config.length=="LONG" and 6.25 or 5.5)).."/"..(p.ram-64).."K",333,507,7,"yellow")
+    UI.text("HEAT",437,507,7,"cyan"); UI.outline(476,503,93,10,"dim")
+    UI.rect(478,505,game.heat*0.89,6,game.heat>75 and "red" or "cyan")
+    UI.button("TURBO",602,500,90,"turbo",nil,"Hold mouse / SHIFT to speed up the motor",game.turbo)
     if game.repair then
-        local r = game.repair
-        UI.text("RETRY " .. string.format("%02d", (r.index - 1) % 80), 64, 507, 8, "yellow")
-        UI.rect(171, 499, 367, 25, "dark"); UI.outline(171, 499, 367, 25, "dim")
-        UI.rect(174 + (r.center - r.width / 2) * 360, 502, r.width * 360, 19, "green")
-        UI.rect(174 + (r.center - r.width * 0.18) * 360, 502, r.width * 0.36 * 360, 19, "white")
-        local marker = 174 + game:marker() * 360
-        UI.rect(marker - 2, 497, 4, 29, "yellow")
-        UI.button("SPACE / RETRY", 550, 501, 142, UI.contains(mx, my, 550, 501, 142, 19))
+        local r=game.repair
+        UI.rect(64,530,400,21,"dark")
+        UI.rect(64+(r.center-r.width/2)*400,530,r.width*400,21,"green")
+        UI.rect(64+(r.center-0.045)*400,530,36,21,"white")
+        UI.rect(63+game:marker()*400,527,3,27,"yellow")
+        UI.button("SPACE: RETRY",482,531,210,"retry",nil,"Press in green to recover the weak read")
+    elseif game.phase=="complete" and game.verified then
+        UI.button("DELIVER COPY  +$"..game.job.pay,64,531,280,"deliver")
+        UI.text("VERIFIED AGAINST ORDER",376,538,7,"green")
     else
-        UI.text("SPACE", 64, 504, 8, "yellow")
-        UI.text("RETRY RED TRACK", 122, 504, 7, "cyan")
-        UI.text("SHIFT", 293, 504, 8, "yellow")
-        UI.text("TURBO", 353, 504, 7, "cyan")
-        UI.text("H", 432, 504, 8, "yellow")
-        UI.text("HELP", 452, 504, 7, "cyan")
-        UI.text("P", 535, 504, 8, "yellow")
-        UI.text("PAUSE", 555, 504, 7, "cyan")
-        UI.text("M", 640, 504, 8, "yellow")
-        UI.text(settings.music and "ON" or "OFF", 659, 504, 7, "cyan")
+        UI.button("DISK INFO",64,531,108,"info")
+        UI.button("MARKET",182,531,97,"market")
+        UI.button("HELP",289,531,80,"help")
+        UI.button("MUSIC "..(settings.music and "ON" or "OFF"),379,531,134,"music")
+        UI.button("DRIVES "..(settings.sfx and "ON" or "OFF"),523,531,169,"sfx")
     end
-    UI.rect(64, 534, 628, 1, "dim")
-    local tip = "A500 DRIVE AUDIO  /  HOLIZNA - ADVENTURE BEGINS  /  CC0"
-    if my >= 192 and my <= 217 and mx >= 77 and mx < 680 then
-        tip = TOOLTIP[math.min(7, math.floor((mx - 77) / 86) + 1)]
-    elseif game.repair then tip = "GREEN = RECOVER  /  WHITE = PERFECT  /  ESC = CANCEL"
-    elseif #game:badTracks() > 0 then tip = "CLICK A RED ! OR PRESS SPACE. ARROWS CYCLE DAMAGED TRACKS." end
-    UI.text(tip, 64, 547, 7, "dim")
 end
-
 return Skin

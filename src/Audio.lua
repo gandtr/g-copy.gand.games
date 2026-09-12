@@ -48,8 +48,8 @@ function Audio:update(dt, game, covered)
     for i = #self.voices, 1, -1 do
         if not self.voices[i]:isPlaying() then table.remove(self.voices, i) end
     end
-    local active = game.phase == "copying" and not game.paused and not covered
-    local spinning = active and game.cursor < 160 and game.stall <= 0 and not game.repair
+    local active = game:busy() and not game.paused and not covered
+    local spinning = active and (game.phase == "reading" or game.phase == "writing" or game.phase == "copying" or game.phase == "verifying") and game.stall <= 0 and not game.repair
     if spinning and self.settings.sfx then
         if not self.motor:isPlaying() then self.motor:play() end
         self.motor:setVolume(gain(game.turbo and -13 or -18))

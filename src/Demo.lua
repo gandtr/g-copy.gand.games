@@ -1,17 +1,31 @@
--- Deterministic visual fixtures. Never active during ordinary play or saved as scores.
-local Demo = {}
-function Demo.setup(game, mode)
-    game:start()
-    game:update(8, false)
-    if mode == "retry" then
-        game:beginRepair()
-        game.repair.elapsed = game.repair.period * 0.35
-    elseif mode == "win" then
-        game.disk, game.score, game.rescued, game.perfects = 3, 27480, 24, 18
-        game.time = 28
-        for i = 1, 160 do game.tracks[i] = i % 11 == 0 and "fixed" or "good" end
-        game.cursor = 160
-        game:finish(true, "ALL THREE DISKS RESCUED")
-    elseif mode == "loss" then game:finish(false, "SHIFT OVER. OUT OF TIME.") end
+-- Isolated deterministic visual fixtures; never written to business.dat.
+local Demo={}
+function Demo.setup(app,mode)
+    local g=app.game
+    if mode=="market" then return end
+    if mode=="hardware" then app.marketTab="hardware"; return end
+    if mode=="protection" or mode=="retry" then
+        g.profile.completed=8; g.profile.money=400
+        g:buyMaster(mode=="protection" and "copper" or "paint")
+        g:setConfig("first",g.job.first); g:setConfig("last",g.job.last); g:setConfig("side",g.job.side)
+    else g:buyMaster("moon") end
+    app.page=nil
+    if mode=="info" then app.page="info"; return end
+    if mode=="range" then app.page="range"; return end
+    g:start()
+    if mode=="swap" then g:update(10,false)
+    elseif mode=="protection" or mode=="retry" then
+        for _=1,1000 do
+            if g.phase=="blocked" then break end
+            if g.phase=="swap" then g:loadMedia(g.swapDrive,g.swapMedia) else g:update(0.1,false) end
+        end
+        if mode=="retry" then g:retry(); g.repair.elapsed=g.repair.period*0.3 end
+    elseif mode=="complete" then
+        for _=1,1000 do
+            if g.phase=="complete" then break end
+            if g.phase=="swap" then g:loadMedia(g.swapDrive,g.swapMedia) else g:update(0.1,false) end
+        end
+        g:verify(); g:update(5,false)
+    else g:update(2,false) end
 end
 return Demo
