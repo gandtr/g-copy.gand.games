@@ -1,58 +1,56 @@
-# Verification — 2026-09-13
+# Verification — business build v2, 2026-09-13
 
-Tested locally on macOS with LÖVE 11.5 and LuaJIT.
+Tested on macOS with LÖVE 11.5 and LuaJIT.
 
-## Automated gameplay
+## Rules and integration
 
-`luajit tests/run.lua`: **17 passed, 0 failed**.
+`luajit tests/run.lua`: **38 passed, 0 failed**.
 
-Coverage: ready state, copy speed, seeded damage, invalid track selection, perfect
-and ordinary retries, misses/combo reset, integrity loss, pause/resume, cancellation,
-turbo, overheat and cooling, uncorrected-disk gating, timeout, fault navigation,
-30/144 Hz agreement, and a complete three-disk campaign.
+Covers starting resources, affordable first master, exact memory capacity, read vs
+write states, 512 KB three-swap copying, 1 MB one-swap copying, long-track capacity,
+external routes, source/destination media validation, one blank per multi-batch
+copy, routing/config locks, range checks, side selection, customer-manifest
+verification, single payment, finite/renewed orders, cached NOCHMAL, custom-header
+and sync/length gates, weak reads, DOSCOPY+ behavior, failed calibration, purchases,
+unlocks/upgrades, pause, motor heat, 30/144 Hz agreement, serialization/migration,
+malformed save values, click dispatch, and completing all nine fictional jobs.
 
-The seeded campaign used actual simulation time and successful input timings:
-480 tracks copied, 24 faults recovered, 24 perfects, five integrity remaining,
-37,635 points, 49.1 seconds left. This proves a safe-speed win is possible; it is
-not a substitute for balancing with human play.
+`XCOPY_SMOKE=1 LOVE_SHOT=1 love .`: **passed** with actual LÖVE graphics/audio.
 
-## LÖVE integration
+The test clicks controls from their rendered bounds, buys a master, opens its
+instructions, types a start track, changes side/mode, resets parameters, starts,
+completes every prompted media swap, verifies/sells a copy, uses NOCHMAL, buys RAM
+and an external drive, opens that bay/tools/info, and checks music/SFX switches.
+Audio sources loaded: the original chiptune loop and short A500 recording excerpts.
+No test/demo writes to the user's business save.
 
-`XCOPY_SMOKE=1 XCOPY_SEED=191 LOVE_SHOT=30 love .`: **passed**.
+## Visual checks
 
-Loaded the PNG, font, looping OGG and mechanical WAV sources. Exercised actual
-mouse/keyboard callbacks for START, track selection, cancel, timed retry, pause,
-resume, help, credits, mouse turbo, music mute and SFX mute. Verified head-click
-excerpts are shorter than 0.1 seconds and music is longer than 50 seconds.
-The screenshot harness exited successfully after capturing the rendered frame.
+Native captures: **2160×1800 pixels**, for a 1080×900 point window with HiDPI.
+The previous build captured 1080×852 pixels and enlarged a 720×568 offscreen canvas.
+Live controls now draw directly into the native framebuffer; the historic header
+keeps its original pixels.
 
-## Visual inspection
+Inspected the market, full desk, numeric track editor, hardware shop, protection
+block, single-drive swap prompt and verified complete disk. Checked text/controls
+for clipping and overlaps. The final success marker is a small hollow green zero;
+original-program references show no checkmark and no diagonal stroke in the zero.
+All visible interactive controls register hit regions; modal panels own their
+regions so clicks do not activate covered controls.
 
-Inspected 1080×852 captures of menu, active copying, retry calibration and winning
-results. Viewed the help overlay in the running native app. No clipped helper
-text, overlapping status controls or missing assets observed. Rendering uses a
-720×568 logical canvas with nearest-neighbour scaling and letterboxing; arbitrary
-noninteger window sizes may produce uneven pixel widths.
+## Scope and limits
 
-## Audio verification
+Each copy uses one selected source and one selected destination. Additional owned
+bays are selectable; concurrent multi-target duplication is not implemented.
+The economy is an initial playable balance, not validated by a broad human test.
+Business resources persist; in-flight copying restarts on relaunch. Originals,
+stock, money, upgrades and delivered orders stay saved. Protection rules and memory
+budgets are explicit game abstractions. No real disks are touched.
 
-Source duration and levels measured with ffprobe/ffmpeg. Music is a 58.99-second
-loop, source peak -5.5 dBFS. The original head-click WAV is an 80-click, 34.51-second
-bank; corrected the initial whole-bank playback to four 2800-sample excerpts using
-the upstream peak/pre-roll convention. Motor, startup and snatch are short real
-sample files. Independent mute controls and loaded-source playback state verified.
-No claim of a separate headphone/speaker listening session or loop-seam listening
-test; music uses the author's supplied loop file.
+Original A500 recordings and the same CC0 music remain unchanged. Automated tests
+verify source loading/mute behavior; there was no separate headphone/speaker mix
+review this turn. The code's voice cap and short extracted clicks remain active.
 
-## Packaging
-
-`scripts/build.py` verifies the ZIP CRCs and compares every bundled file with its
-source bytes. Runtime assets are vendored; no network is required to play.
-Tests/demo sessions are isolated from user high-score writes.
-
-## Remaining scope
-
-The original X-Copy artwork is the requested temporary skin. No public release,
-remote Git repository or store upload was made. Later work can reskin the UI,
-tune the challenge using player feedback, and create standalone engine bundles.
-The current `.love` deliverable requires the installed LÖVE runtime.
+The `.love` archive is verified for CRC integrity and source-byte equality by the
+build script. It requires the installed LÖVE runtime. No public release or remote
+repository push was made. Original artwork remains the temporary requested skin.

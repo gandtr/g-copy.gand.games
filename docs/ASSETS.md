@@ -19,3 +19,17 @@ CC0 legal text: https://creativecommons.org/publicdomain/zero/1.0/legalcode
 
 The music's CC0 status does not apply to the X-Copy artwork or drive recordings.
 The original X-Copy disk/application executable is not included.
+
+## v2 original-mark verification and resolution changes
+
+[X-Copy Shrine: error codes](https://jope.fi/xcopy/errors.html) explicitly identifies
+successful tracks as green zeros and failed tracks as red numbers. A completed
+screen in [Amedeo Valoroso's X-Copy article](https://www.valoroso.it/en/x-copy-pro-amiga-copy-game-program-disk/)
+visually confirms hollow green zeros. That photograph was used for inspection only,
+not bundled as game art. The old hand-drawn checkmark and the replacement font's
+slashed zero were removed; `UI.zero` now draws a small hollow zero.
+
+The downloaded 1992 screen file is still unchanged. v2 draws its header as a quad
+and reconstructs the live controls, drive bays and grids in code at native window
+resolution. HiDPI is enabled. This does not add detail to the historic raster header.
+No new music or drive recordings were added in v2.

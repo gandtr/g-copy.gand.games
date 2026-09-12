@@ -1,49 +1,51 @@
-# X-Copy: Track Rescue
+# Track Rescue v2: a disk-copying business
 
-## Brief and assumptions
+The user expanded the original arcade prototype into a persistent copy desk:
+start with one drive and 512 KB, buy software masters, fulfil copying instructions,
+earn money and purchase RAM/external drives. Preserve the X-Copy identity, fix the
+wrong checkmarks, sharpen the UI and make controls affect drive operations.
 
-A small, complete arcade game played inside the original Amiga X-Copy interface.
-Use the actual 1992 screen as the temporary skin, mechanical A500 recordings,
-and an explicitly public-domain / CC0 chiptune. The user delegated the game idea.
+## Decisions
 
-Assumptions: single player, offline desktop, keyboard and mouse, 60 FPS target,
-three disks per run, no network or accounts, local best-score/settings storage.
-LÖVE 11.5 is already installed alongside the user's other game projects. Gameplay
-and rendering live in separate modules so the user can replace the skin later.
-Only simulated disks are involved. The user's files and physical drives are never used.
+- Replace the three-disk countdown with an ongoing shop economy. Retain timed
+  recovery for weak reads and heat/turbo for optional speed optimization.
+- Model 160 side-tracks as a selected operation queue: 80 cylinders, upper/lower.
+  A standard side-track uses 5.5 KB; a long one uses 6.25 KB. Reserve 64 KB of RAM
+  for the copier. At 512 KB, 81 standard side-tracks fit in the 448 KB buffer.
+- Read, swap, write, block and verify are separate states. One drive requires
+  alternating media. A separate source/target in DISK mode streams directly.
+  RAM mode stages the image. Completed images can be cached if they fit.
+- One selected source and one selected target per operation. All purchased bays
+  are real selectable routes. Concurrent writes to several targets are deferred.
+- Use exact destination track-set equality against the customer's manifest. Extra
+  tracks are as incorrect as missing tracks. Verify before payment; pay once.
+- NOCHMAL retries a blocked track or repeats a completed master with current
+  settings. A matching cached image skips source reads. Changing the range/profile
+  invalidates incompatible cached repeats.
+- Nine fictional titles supply increasingly complex rules: range/side selection,
+  NIBBLE headers, custom sync words, long tracks and weak checksum reads. These
+  are transparent game puzzles, not real filesystem or copy-protection tooling.
+- Finite customer batches encourage browsing, with a NEW ORDERS action to renew
+  sold-out owned masters and keep the business playable after the initial catalog.
+- Persist cash, RAM, drives, blanks, purchases, customer delivery counts and total
+  deliveries. Save audio preferences alongside them. Do not serialize an in-flight
+  operation; a relaunch loads the selected master back at the idle desk.
+- Native framebuffer rendering + HiDPI + larger font rasterization improves live
+  controls; retain the original raster header. Draw hollow zeros instead of ticks
+  or a font's slashed-zero glyph. Do not invent detail in the historical header.
 
-## Decision log
+## Architecture
 
-- Chose a disk rescue timing game. Alternatives were a click-only bad-sector
-  whack-a-mole and a multi-drive management simulation. Timing gives a skill ceiling
-  within a small scope; turbo adds a second decision without crowding the screen.
-- Chose LÖVE and pure Lua rules: small project, fast boot, deterministic headless tests.
-- Keep the downloaded screenshot unmodified. Draw live values, track marks and game
-  overlays on top, and put the retry controls in the screen's unused bottom area.
-- Use UAE A500 mechanical sound samples, with source provenance and bundled upstream
-  license. Use Holizna's already-loopable CC0 music without recomposing it.
-- Finite three-disk shift with a result screen and immediate replay. No multiplayer,
-  real copying, external services, asset generation or publishing in this first build.
-
-## Rules
-
-Copy 160 tracks per disk (two sides of 80) in a 110-second shift. Copying reveals
-damaged tracks. Select a red track with the mouse, arrows, or Space. During a retry,
-the head stops while a marker sweeps across a calibration bar. Press Space / click
-REPEAT inside green to rescue the track; the white centre gives a perfect bonus.
-Missing costs one of five integrity points. Esc cancels calibration or pauses.
-
-Hold Shift / the turbo button to increase copy speed. Sustained turbo overheats
-the drive, causing a two-second stall and costing integrity. Cooling is automatic
-when turbo is released. Later disks have more damage and smaller timing windows.
-Scanning completion plus zero remaining damaged tracks completes the disk. Press
-Space / START to insert the next disk. All three rescued wins; no integrity or
-time ends the shift. Accuracy, combos, turbo copying and remaining time score points.
+Pure Lua Game + Operation are independent of rendering and I/O. Catalog contains
+market data. App dispatches keyboard and registered click regions. UI region
+registration uses the same bounds as rendering, including popup/modal controls.
+Skin is the desk; Overlay renders market, information, tools and media dialogs.
+Storage uses an explicit key/value format, bounds checks and an atomic rename.
+The older scores file is only a preferences migration source.
 
 ## Verification
 
-Pure Lua tests cover win/loss, copy progress, deterministic damage, retry scoring,
-failure, heat, turbo, pause, state transitions, and different update rates. LÖVE
-integration smoke tests load real assets, execute input callbacks, render and exit.
-The shared screenshot harness captures the menu, gameplay, retry and results for
-visual inspection. A `.love` package and macOS launcher make the result runnable.
+Deterministic tests cover all nine orders and memory/economy/control boundaries.
+LÖVE tests exercise actual input callbacks and loaded assets. Screenshot inspection
+covers market, desk, range controls, hardware, protection, swap and completion.
+The build is local and offline; the user can replace art and tune the catalog later.
