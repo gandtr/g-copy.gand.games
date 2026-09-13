@@ -53,6 +53,8 @@ function Overlay.market(app)
             UI.button(">",245,492,45,"market_page",1)
         end
     end
+    UI.button("GAND.GAMES",84,493,104,"link","https://gand.games","Visit the Gand Games studio site")
+    UI.button("COMMIT!!!",196,493,104,"link","https://commit.gand.tr","Play Commit!!!, the first Gand Games release")
     UI.button("NEW ORDERS",309,493,130,"orders",nil,"New customers reorder sold-out titles you already own")
     UI.button("5 BLANK DISKS  $6",450,493,216,"blanks")
     UI.text("Masters stay in your collection. Each customer has a limited order.",84,531,7,"dim")
@@ -114,7 +116,7 @@ function Overlay.tools(app)
     local entries={{"MARKET / MASTERS / HARDWARE","market"},{"TRACK RANGE / LENGTH / BUFFER","range"},
         {"CHECKDISK / DIAGNOSE","verify"},{"NOCHMAL / RETRY OR REPEAT","repeat"},
         {"DISK INFORMATION","info"},{"FORMAT TARGET DISK","format"},{"ABORT CURRENT COPY","abort"},
-        {"BUSINESS / OPERATION STATUS","status"},{"HELP","help"},{"ORIGINAL ART + MUSIC CREDITS","credits"}}
+        {"BUSINESS / OPERATION STATUS","status"},{"HELP","help"},{"CREDITS + GAND GAMES LINKS","credits"}}
     for i,e in ipairs(entries) do UI.button(e[1],84,179+(i-1)*30,580,e[2]) end
     UI.button("MUSIC "..(app.settings.music and "ON" or "OFF"),84,491,280,"music")
     UI.button("SFX "..(app.settings.sfx and "ON" or "OFF"),384,491,280,"sfx")
@@ -161,6 +163,9 @@ function Overlay.credits(app)
     line("A500 DRIVE AUDIO + A600 INSERT / EJECT (ASIE / CC0)",308,"white")
     line("MUSIC: ADVENTURE BEGINS LOOP / HOLIZNA / CC0",347,"white")
     UI.text("Full asset sources and licenses are in docs/ASSETS.md.\nAll market software and protection puzzles are imaginary.\nBusiness progress is saved; active copying restarts on relaunch.",84,390,8,"cyan",580)
+    UI.text("A GAND GAMES PRODUCTION",84,440,9,"yellow")
+    UI.button("GAND.GAMES",84,456,285,"link","https://gand.games","Visit the Gand Games studio site")
+    UI.button("PLAY COMMIT!!!",379,456,285,"link","https://commit.gand.tr","Play Commit!!!, the first Gand Games release")
     UI.button("BACK",84,505,580,"close")
 end
 function Overlay.draw(app)

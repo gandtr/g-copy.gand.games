@@ -1,6 +1,10 @@
-# X-Copy: Track Rescue — the floppy disk business
+# G Copy — the floppy disk business
 
-A small disk-copying business inside the Amiga X-Copy interface. Begin with one
+A [Gand Games](https://gand.games) release. Also play
+[Commit!!!](https://commit.gand.tr), the studio's first game.
+
+A small disk-copying business inside a classic Amiga copier interface, made as a
+loving homage to X-Copy. Begin with one
 internal drive, 512 KB RAM, $40 and three blank disks. Buy imaginary game and
 program masters at the Saturday market, fulfil customers' copying instructions,
 verify the destination and get paid. Spend your earnings on RAM and external drives.
@@ -125,7 +129,7 @@ These are game abstractions, not instructions for a real copier or real protecti
   lifetime deliveries or charging for the master again.
 
 Business progress and audio preferences save atomically as non-executable text to
-`~/Library/Application Support/LOVE/x-copy-track-rescue/business.dat` on macOS.
+`~/Library/Application Support/LOVE/g-copy/business.dat` on macOS.
 Old `scores.dat` audio preferences migrate automatically. **Active copy progress
 restarts after quitting**; purchased masters, cash, hardware, stock and delivered
 orders remain saved. A blank already inserted into an interrupted copy remains used.
@@ -149,6 +153,33 @@ only the eject. Invalid media actions remain silent. SFX mute cancels queued sou
 the music and motor duck while the media mechanism plays. The original UAE A500
 motor/head recordings and Holizna's CC0 **Adventure Begins Loop** remain bundled.
 See [asset provenance](docs/ASSETS.md) for sources and individual licenses.
+
+## Web build (g-copy.gand.games)
+
+The browser build uses [love.js](https://github.com/Davidobot/love.js) 11.4
+(WebAssembly, pinned by `package-lock.json`) and deploys to GitHub Pages:
+
+```sh
+npm ci                  # one-time, installs the pinned love.js runtime
+bash build_web.sh       # packages the game and emits dist/web
+python3 serve.py        # local test at http://localhost:8000 (COOP/COEP headers)
+```
+
+`build_web.sh` reuses `scripts/build.py`, injects the localStorage save bridge
+(`tools/inject_bridge.js` + `web_template/storage-bridge.js`, which also handles
+the atomic `business.tmp` → `business.dat` rename), installs the
+coi-serviceworker shim GitHub Pages needs for cross-origin isolation, and
+writes `CNAME` (g-copy.gand.games) and `.nojekyll`. The whole site is ~10 MB,
+well inside Pages limits.
+
+Pushes to `main` deploy via `.github/workflows/deploy-pages.yml`. One-time
+setup: repo Settings → Pages → Source "GitHub Actions", and a DNS CNAME record
+for `g-copy.gand.games` pointing at `gandtr.github.io`.
+
+love.js notes: `love.system.openURL` maps to `window.open` (studio link
+buttons work in-browser); `Storage.load` guards with `getInfo` because reading
+a missing file hangs this runtime; audio starts after the first user gesture
+per browser autoplay rules.
 
 ## Develop and verify
 

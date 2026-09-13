@@ -15,6 +15,7 @@ function Demo.setup(app,mode)
         return
     end
     if mode=="market" then return end
+    if mode=="credits" then app.page="credits"; return end
     if mode=="hardware" then app.marketTab="hardware"; return end
     if mode=="protection" or mode=="retry" then
         g.profile.completed=8; g.profile.money=400

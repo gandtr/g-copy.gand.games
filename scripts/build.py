@@ -10,7 +10,7 @@ parser.add_argument("--output", type=Path, default=ROOT / "dist")
 args = parser.parse_args()
 output = args.output.resolve()
 output.mkdir(parents=True, exist_ok=True)
-archive = output / "X-Copy Track Rescue.love"
+archive = output / "G Copy.love"
 files = [ROOT / name for name in ("main.lua", "conf.lua", "harness.lua", "README.md")]
 for directory in ("src", "assets", "docs", "tests"):
     files.extend(p for p in (ROOT / directory).rglob("*") if p.is_file() and not p.name.startswith("."))
@@ -21,13 +21,13 @@ with ZipFile(archive) as bundle:
     assert bundle.testzip() is None
     for path in files:
         assert bundle.read(str(path.relative_to(ROOT))) == path.read_bytes()
-launcher = output / "Play X-Copy Track Rescue.command"
+launcher = output / "Play G Copy.command"
 launcher.write_text('''#!/bin/sh
 cd -- "$(dirname -- "$0")" || exit 1
 if command -v love >/dev/null 2>&1; then
-    exec love "X-Copy Track Rescue.love"
+    exec love "G Copy.love"
 elif [ -x /Applications/love.app/Contents/MacOS/love ]; then
-    exec /Applications/love.app/Contents/MacOS/love "X-Copy Track Rescue.love"
+    exec /Applications/love.app/Contents/MacOS/love "G Copy.love"
 else
     echo 'Install LÖVE 11.5 from https://love2d.org, then run this launcher again.'
     read -r answer

@@ -34,7 +34,12 @@ function Storage.decode(data)
     return settings,p
 end
 function Storage.load()
-    return Storage.decode(love.filesystem.read("business.dat") or love.filesystem.read("scores.dat"))
+    -- Guard with getInfo: love.filesystem.read on a missing file hangs the
+    -- love.js runtime (worker/proxy deadlock); native LÖVE returns nil either way.
+    local data
+    if love.filesystem.getInfo("business.dat") then data=love.filesystem.read("business.dat")
+    elseif love.filesystem.getInfo("scores.dat") then data=love.filesystem.read("scores.dat") end
+    return Storage.decode(data)
 end
 function Storage.save(settings,p)
     local data=Storage.encode(settings,p)

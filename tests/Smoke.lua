@@ -45,7 +45,11 @@ function Smoke.run(app,audio)
     for _=1,200 do if g.phase=="complete" then break end; g:update(0.1,false) end
     assert(g.verified and g.copies[1].verified and g.copies[2].verified)
     click("deliver"); assert(g.profile.money==170 and g.profile.blanks==1)
-    click("tools"); click("market"); assert(app.page=="market"); click("close")
+    click("tools"); click("market"); assert(app.page=="market")
+    love.draw(); local linked={}
+    for _,r in ipairs(UI.regions) do if r.id=="link" then linked[r.value]=true end end
+    assert(linked["https://gand.games"] and linked["https://commit.gand.tr"],"market studio links")
+    click("close")
     -- The real A600 samples play in order and the mute switch cancels the queue.
     assert(audio.samples.eject:getDuration()>0.5); assert(audio.samples.insert:getDuration()>0.4)
     audio.settings.sfx=true; audio.mediaQueue={}; audio.mediaVoice=nil
@@ -57,6 +61,6 @@ function Smoke.run(app,audio)
     audio.settings.sfx=true
     require("tests.SkinPixels").run()
     app.page=nil
-    print("SMOKE PASS: native UI, typing ranges, profile fields, swaps, verification, payment, repeat, hardware, multiple COPY/V bulbs, automatic batch verification, payment, A600 media audio, original screen pixels")
+    print("SMOKE PASS: native UI, typing ranges, profile fields, swaps, verification, payment, repeat, hardware, multiple COPY/V bulbs, automatic batch verification, payment, studio links, A600 media audio, original screen pixels")
 end
 return Smoke

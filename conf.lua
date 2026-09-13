@@ -1,7 +1,7 @@
 function love.conf(t)
-    t.identity = "x-copy-track-rescue"
+    t.identity = "g-copy"
     t.version = "11.5"
-    t.window.title = "X-Copy: Track Rescue"
+    t.window.title = "G Copy"
     t.window.width, t.window.height = 1080, 900
     t.window.minwidth, t.window.minheight = 720, 600
     t.window.resizable = true

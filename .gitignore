@@ -2,4 +2,8 @@
 screenshots/
 dist/
 work/
+build/
+node_modules/
+/game.love
 *.log
+.pstack/
