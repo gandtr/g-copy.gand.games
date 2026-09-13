@@ -2,8 +2,7 @@
 
 **Play free in your browser: [g-copy.gand.games](https://g-copy.gand.games)** — no install, progress is saved between visits.
 
-A [Gand Games](https://gand.games) release. Also play
-[Commit!!!](https://commit.gand.tr), the studio's first game.
+A [Gand Games](https://gand.games) release.
 
 ![The Saturday Disk Market](docs/screenshot.png)
 

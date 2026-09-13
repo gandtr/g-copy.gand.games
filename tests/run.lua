@@ -193,7 +193,7 @@ test("click actions change profile, media, routing and numeric inputs",function(
     a:action("defaults"); a:action("media",{index=0,media="source"}); eq(a.page,nil)
     a:action("link","https://gand.games"); assert(a.game.message:find("gand.games",1,true))
     local opened; love={system={openURL=function(url) opened=url; return true end}}
-    a:action("link","https://commit.gand.tr"); eq(opened,"https://commit.gand.tr"); love=nil
+    a:action("link","https://gand.games"); eq(opened,"https://gand.games"); love=nil
     a:action("start"); assert(a.game:busy()); a:action("pause"); eq(a.game.paused,true)
 end)
 test("all nine fictional orders can be completed and sold",function()

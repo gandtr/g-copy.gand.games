@@ -48,7 +48,7 @@ function Smoke.run(app,audio)
     click("tools"); click("market"); assert(app.page=="market")
     love.draw(); local linked={}
     for _,r in ipairs(UI.regions) do if r.id=="link" then linked[r.value]=true end end
-    assert(linked["https://gand.games"] and linked["https://commit.gand.tr"],"market studio links")
+    assert(linked["https://gand.games"],"market studio link")
     click("close")
     -- The real A600 samples play in order and the mute switch cancels the queue.
     assert(audio.samples.eject:getDuration()>0.5); assert(audio.samples.insert:getDuration()>0.4)
