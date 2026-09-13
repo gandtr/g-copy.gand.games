@@ -1,7 +1,11 @@
 # G Copy — the floppy disk business
 
+**Play free in your browser: [g-copy.gand.games](https://g-copy.gand.games)** — no install, progress is saved between visits.
+
 A [Gand Games](https://gand.games) release. Also play
 [Commit!!!](https://commit.gand.tr), the studio's first game.
+
+![The Saturday Disk Market](docs/screenshot.png)
 
 A small disk-copying business inside a classic Amiga copier interface, made as a
 loving homage to X-Copy. Begin with one
@@ -9,17 +13,18 @@ internal drive, 512 KB RAM, $40 and three blank disks. Buy imaginary game and
 program masters at the Saturday market, fulfil customers' copying instructions,
 verify the destination and get paid. Spend your earnings on RAM and external drives.
 
-## Play
+## Run the desktop version
 
-Requires **LÖVE 11.5**, already installed on this Mac.
+The browser version above is the easiest way to play. To run it natively,
+install [LÖVE 11.5](https://love2d.org), then:
 
 ```sh
-cd /Users/arda/projects/games/x-copy-track-rescue
-love .
+git clone https://github.com/gandtr/g-copy.gand.games.git
+love g-copy.gand.games
 ```
 
-Or double-click `play.command`. The packaged `.love` opens with LÖVE on macOS,
-Windows and Linux. Everything is offline and uses imaginary disks; the game never
+On macOS you can also `cd` into the clone and double-click `play.command`.
+Everything is offline and uses imaginary disks; the game never
 reads, copies or modifies your real drives or software.
 
 ## Your first order
@@ -129,7 +134,8 @@ These are game abstractions, not instructions for a real copier or real protecti
   lifetime deliveries or charging for the master again.
 
 Business progress and audio preferences save atomically as non-executable text to
-`~/Library/Application Support/LOVE/g-copy/business.dat` on macOS.
+`business.dat` in LÖVE's per-user save directory; the browser build keeps them in
+the site's local storage instead.
 Old `scores.dat` audio preferences migrate automatically. **Active copy progress
 restarts after quitting**; purchased masters, cash, hardware, stock and delivered
 orders remain saved. A blank already inserted into an interrupted copy remains used.
@@ -203,7 +209,8 @@ Test/demo sessions never write the user's business save.
 
 The build script creates a `.love` and macOS launcher in `dist/`, verifies archive
 CRCs and compares all bundled files against their source bytes. `--output PATH`
-selects another destination. No public publishing or remote Git push is performed.
+selects another destination. Browser deployment is covered in the web build
+section above.
 
 `Game.lua` owns business/media state; `Operation.lua` implements copying and
 verification; `Catalog.lua` defines fictional jobs/upgrades; `App.lua` dispatches
