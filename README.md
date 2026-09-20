@@ -94,7 +94,7 @@ Click a drive to inspect its verification status. Selecting an external target t
 off the source drive's target role; selecting the source as target returns to a
 single-drive swap operation. Installed new drives start with their target bulb off.
 
-The original desk is restored in full. Open the market through **TOOLS > MARKET**
+The G-COPY desk uses Gand's replacement artwork. Open the market through **TOOLS > MARKET**
 or **B**; click the green status strip for the operation report and business totals.
 
 Keyboard: **Tab / Shift+Tab** selects any visible control and **Enter** activates it.
@@ -144,11 +144,11 @@ orders remain saved. A blank already inserted into an interrupted copy remains u
 
 Success marks are hollow **green zeros**, verified against the X-Copy Shrine's
 error reference and a photograph of the original completed-copy screen. The
-**complete original 1992 bitmap** supplies the logo, German labels, borders,
+**G-COPY by Gand bitmap** supplies the logo, German labels, borders,
 arrows, floppy icons, grids and black margins. Transparent hit regions keep the
-original artwork clickable. Live settings and results are overlaid in place.
+supplied artwork clickable. Live settings and results are overlaid in place.
 The source bitmap also supplies the OFF, lit COPY and orange V bulb sprites.
-Existing yellow glyphs are sampled from the original; additional characters use
+Existing yellow glyphs are sampled from the supplied image; additional characters use
 matching pixel geometry. New market and game dialogs remain separate pop-ups.
 The desk and dialogs scale to the available viewport with nearest-neighbour
 filtering. Unused bitmap margins are cropped from the view; all original controls
@@ -203,7 +203,7 @@ economy, upgrades, repeat caching, saves, and all nine orders. The real LÖVE sm
 test clicks rendered controls, types a range, completes/validates/sells a copy,
 repeats it, buys hardware, selects multiple targets, auto-verifies and sells a batch,
 and checks the sequential insert/eject audio and mute behavior. A pixel test compares
-the static screen and all three bulb states against the original bitmap.
+the static screen and all three bulb states against the supplied G-COPY bitmap.
 
 Browser regression tests complete three real copy/verify/deliver playthroughs at
 desktop, mobile landscape and mobile portrait sizes, reload saved progress, check

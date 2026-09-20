@@ -36,11 +36,11 @@ wrong checkmarks, sharpen the UI and make controls affect drive operations.
 - Persist cash, RAM, drives, blanks, purchases, customer delivery counts and total
   deliveries. Save audio preferences alongside them. Do not serialize an in-flight
   operation; a relaunch loads the selected master back at the idle desk.
-- Use the complete original bitmap with transparent hit regions. Overlay only
-  live settings, status, bulb states, time and track results. Preserve original
+- Use the user-supplied G-COPY by Gand bitmap with transparent hit regions. Overlay only
+  live settings, status, bulb states, time and track results. Preserve the supplied
   German controls and black margins; put business features in TOOLS pop-ups.
-  Nearest filtering and physical-pixel scaling preserve the original raster.
-- Use the original V sprite from the screenshot, not a replacement letter.
+  Nearest filtering preserves the supplied raster when fitting the viewport.
+- Use the V sprite from the supplied image, not a replacement letter.
 - Emit accepted media changes with previous/new media so the audio layer queues
   real A600 eject then insert recordings. Mute cancels the media queue.
 

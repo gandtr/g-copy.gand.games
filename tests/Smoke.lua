@@ -74,6 +74,6 @@ function Smoke.run(app,audio)
     audio.settings.sfx=true
     require("tests.SkinPixels").run()
     app.page=nil
-    print("SMOKE PASS: native UI, typing ranges, profile fields, swaps, verification, payment, repeat, hardware, multiple COPY/V bulbs, automatic batch verification, payment, studio links, A600 media audio, original screen pixels")
+    print("SMOKE PASS: native UI, typing ranges, profile fields, swaps, verification, payment, repeat, hardware, multiple COPY/V bulbs, automatic batch verification, payment, studio links, A600 media audio, G-COPY artwork pixels")
 end
 return Smoke
