@@ -11,7 +11,20 @@ function Smoke.run(app,audio)
     end
     assert(audio.music:getDuration()>50)
     for i=1,4 do assert(audio.samples["click"..i]:getDuration()<0.1) end
-    click("master","moon"); assert(app.page=="info")
+    -- Pagination must win the actual hit test rather than an overlapping link.
+    click("market_page",1); assert(app.marketPage==1)
+    love.draw()
+    assert(UI.hit(186,502).id=="market_page")
+    click("market_page",-1); assert(app.marketPage==0)
+    -- Every rendered control is reachable through keyboard focus.
+    love.draw()
+    local count=#UI.regions
+    for _=1,count do
+        love.keypressed("tab")
+        if UI.focused().id=="master" and UI.focused().value=="moon" then break end
+    end
+    assert(UI.focused().id=="master" and UI.focused().value=="moon")
+    love.keypressed("return"); assert(app.page=="info")
     click("range"); click("edit","first"); love.textinput("12"); love.keypressed("return")
     assert(app.game.config.first==12)
     click("side"); assert(app.game.config.side=="UPPER")

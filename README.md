@@ -97,7 +97,8 @@ single-drive swap operation. Installed new drives start with their target bulb o
 The original desk is restored in full. Open the market through **TOOLS > MARKET**
 or **B**; click the green status strip for the operation report and business totals.
 
-Keyboard: **Enter** starts/swaps/delivers; **Space/R** retries or repeats; **P**
+Keyboard: **Tab / Shift+Tab** selects any visible control and **Enter** activates it.
+With no control selected, **Enter** starts/swaps/delivers; **Space/R** retries or repeats; **P**
 pauses; **V** verifies; **B** market; **I** disk info; **H** help; **C** credits;
 **M/S** audio; **Shift** turbo; **F11** fullscreen; **Escape** cancels calibration,
 closes a panel or pauses. Window focus loss pauses the motor.
@@ -149,8 +150,10 @@ original artwork clickable. Live settings and results are overlaid in place.
 The source bitmap also supplies the OFF, lit COPY and orange V bulb sprites.
 Existing yellow glyphs are sampled from the original; additional characters use
 matching pixel geometry. New market and game dialogs remain separate pop-ups.
-HiDPI and nearest-neighbour scaling keep source pixels crisp at whole physical
-pixel multiples. This preserves historical pixel detail rather than inventing it.
+The desk and dialogs scale to the available viewport with nearest-neighbour
+filtering. Unused bitmap margins are cropped from the view; all original controls
+and dialog content remain visible. High-DPI rendering and pointer coordinates
+follow the same transform on desktop and touch screens.
 
 Disk swaps now play actual **Amiga 600 ejection and insertion recordings**, by
 asie, CC0, in sequence. Empty-drive insertion plays only the insert; eject plays
@@ -189,18 +192,32 @@ per browser autoplay rules.
 ## Develop and verify
 
 ```sh
-luajit tests/run.lua
+npm test                # Lua tests + JavaScript save-bridge regressions
 XCOPY_SMOKE=1 LOVE_SHOT=1 love .
 XCOPY_DEMO=complete LOVE_SHOT=1 love .
 python3 scripts/build.py
 ```
 
-49 deterministic tests cover memory, swaps, routing, verification, protection,
+51 deterministic tests cover memory, swaps, routing, verification, protection,
 economy, upgrades, repeat caching, saves, and all nine orders. The real LÖVE smoke
 test clicks rendered controls, types a range, completes/validates/sells a copy,
 repeats it, buys hardware, selects multiple targets, auto-verifies and sells a batch,
 and checks the sequential insert/eject audio and mute behavior. A pixel test compares
 the static screen and all three bulb states against the original bitmap.
+
+Browser regression tests complete three real copy/verify/deliver playthroughs at
+desktop, mobile landscape and mobile portrait sizes, reload saved progress, check
+fullscreen and resizing, and recover a save with IndexedDB disabled:
+
+```sh
+npx playwright install chromium
+bash build_web.sh
+python3 serve.py         # leave running in another terminal
+npm run test:web
+```
+
+GitHub Pages deployment runs the Lua, save-bridge and browser tests before
+publishing. Screenshots are written under `screenshots/audit-web/`.
 
 Screenshot fixtures: `market`, `hardware`, `info`, `range`, `play`, `swap`,
 `protection`, `retry`, `complete`, `classic`, `multi`, `multi_complete`. `XCOPY_SEED` fixes the random calibration window.

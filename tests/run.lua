@@ -303,4 +303,29 @@ test("accepted media changes emit eject/insert details; invalid swaps stay silen
     local events=g:drainEvents(); eq(events[#events].kind,"media"); eq(events[#events].value.media,"empty")
 end)
 
+test("failed studio links show a usable URL",function()
+    local oldLove=love
+    love={system={openURL=function() return false end}}
+    local settings,profile=Storage.defaults(); local app=App.new(settings,profile,1)
+    app:action("link","https://gand.games")
+    assert(app.game.message:find("OPEN IN A BROWSER",1,true))
+    love=oldLove
+end)
+
+test("viewport fills available space and pointer mapping roundtrips",function()
+    local UI=require("src.UI"); local oldLove=love
+    for _,size in ipairs({{320,568},{844,390},{1440,900},{2805,1854}}) do
+        love={graphics={getDimensions=function() return size[1],size[2] end}}
+        for _,height in ipairs({406,442,544}) do
+            UI.view={x=58,y=30,w=640,h=height}
+            local scale,x,y=UI.transform()
+            assert(x+58*scale>=-1e-8 and y+30*scale>=-1e-8)
+            assert(math.abs(640*scale-size[1])<1e-8 or math.abs(height*scale-size[2])<1e-8)
+            local mx,my=UI.mouse(x+388*scale,y+352*scale)
+            assert(math.abs(mx-388)<1e-8 and math.abs(my-352)<1e-8)
+        end
+    end
+    love=oldLove
+end)
+
 print(string.format("\n%d passed / %d failed",passed,failed)); os.exit(failed==0 and 0 or 1)

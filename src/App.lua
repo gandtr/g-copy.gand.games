@@ -29,7 +29,9 @@ function App:action(id,value,y)
     if id=="close" then self:applyEdit(); self.page=nil
     elseif id=="link" then
         local open=love and love.system and love.system.openURL
-        if not (open and pcall(open,value)) then g:notice("OPEN IN A BROWSER: "..value) end
+        local ok,opened=false,false
+        if open then ok,opened=pcall(open,value) end
+        if not ok or not opened then g:notice("OPEN IN A BROWSER: "..value) end
     elseif id=="market" then self:open("market")
     elseif id=="directory" then self.marketTab="collection"; self.marketPage=0; self:open("market")
     elseif id=="market_tab" then self.marketTab=value; self.marketPage=0

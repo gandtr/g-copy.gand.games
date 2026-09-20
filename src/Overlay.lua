@@ -48,12 +48,12 @@ function Overlay.market(app)
         end
         if #jobs==0 then line("Your shelf is empty. Buy a master disk to begin.",260) end
         if #jobs>6 then
-            UI.button("<",84,492,45,"market_page",-1)
-            UI.text("PAGE "..(app.marketPage+1),147,499,7,"cyan")
-            UI.button(">",245,492,45,"market_page",1)
+            UI.button("<",84,492,30,"market_page",-1)
+            UI.text("PAGE "..(app.marketPage+1),122,499,6,"cyan")
+            UI.button(">",171,492,30,"market_page",1)
         end
     end
-    UI.button("GAND.GAMES",84,493,216,"link","https://gand.games","Visit the Gand Games studio site")
+    UI.button("GAND.GAMES",208,493,92,"link","https://gand.games","Visit the Gand Games studio site")
     UI.button("NEW ORDERS",309,493,130,"orders",nil,"New customers reorder sold-out titles you already own")
     UI.button("5 BLANK DISKS  $6",450,493,216,"blanks")
     UI.text("Masters stay in your collection. Each customer has a limited order.",84,531,7,"dim")
@@ -148,7 +148,7 @@ function Overlay.help(app)
         "6. V auto-verifies. PRUEFEN checks copy-only targets.",
         "7. NOCHMAL repeats. RAM caches images; external drives",
         "   Click the VERIFIED status / ENTER to deliver the batch.",
-        "B market. TOOLS settings. ENTER start/swap. H help.",
+        "TAB / SHIFT+TAB select. ENTER activate. B market. H help.",
         "SHIFT turbo. M music. S drive sounds. F11 fullscreen.",
     }
     for i,text in ipairs(lines) do UI.text(text,84,181+(i-1)*25,8,i==11 and "yellow" or "cyan",585) end

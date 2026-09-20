@@ -85,10 +85,16 @@
         return origSyncfs.call(FS, populate, function (err) {
             if (populate && !seeded) {
                 seeded = true;
-                if (!err) {
-                    try { seedFromLocalStorage(); } catch (e) {}
-                }
+                // localStorage is an independent backup: recover it even when
+                // IndexedDB is unavailable (for example in restricted browsers).
+                try { seedFromLocalStorage(); } catch (e) {}
                 Module.removeRunDependency("gcopy_storage_seed");
+                if (err) {
+                    // The bundled runtime otherwise leaves IDBFS_sync pending
+                    // forever. Continue with MEMFS and the localStorage mirror.
+                    if (Module.printErr) Module.printErr("IndexedDB unavailable; using localStorage saves.");
+                    err = null;
+                }
             }
             if (callback) callback(err);
         });

@@ -31,20 +31,29 @@ function love.update(dt)
     audio:update(dt,app.game,app.page~=nil)
 end
 function love.draw()
+    UI.setView(app)
     local mx,my=UI.mouse(love.mouse.getPosition())
-    UI.begin(mx,my)
-    love.graphics.clear(0,0,0)
+    UI.begin(mx,my,app.page or (app.game.phase=="swap" and "swap") or (app.game.paused and "paused") or "desk")
+    love.graphics.clear(0.02,0.035,0.04)
     local scale,x,y=UI.transform()
+    local view=UI.view
+    love.graphics.setScissor(x+view.x*scale,y+view.y*scale,view.w*scale,view.h*scale)
     love.graphics.push(); love.graphics.translate(x,y); love.graphics.scale(scale)
     UI.rect(0,0,UI.W,UI.H,"black")
     skin:draw(app.game,app.settings,clock)
     Overlay.draw(app)
-    if app.page then UI.text(app.game.message,64,561,7,"cyan",628) end
+    UI.drawFocus()
+    if app.page then UI.text(app.game.message,64,558,6,"cyan",628) end
     love.graphics.pop()
+    love.graphics.setScissor()
     love.mouse.setCursor(UI.hit(mx,my) and UI.hand or UI.arrow)
 end
 function love.keypressed(key,_,repeated)
     if key=="f11" and not repeated then love.window.setFullscreen(not love.window.getFullscreen(),"desktop"); return end
+    if key=="tab" and not app.editKey then UI.focusNext(love.keyboard.isDown("lshift","rshift")); return end
+    if key=="return" and not app.editKey and UI.focused() then
+        local r=UI.focused(); UI.focusIndex=nil; app:action(r.id,r.value,r.y+r.h/2); return
+    end
     if repeated and not app.editKey then return end
     app:key(key)
 end
@@ -53,6 +62,7 @@ function love.textinput(text)
 end
 function love.mousepressed(x,y,button)
     if button~=1 and button~=2 then return end
+    UI.focusIndex=nil
     x,y=UI.mouse(x,y)
     local region=UI.hit(x,y)
     if region then

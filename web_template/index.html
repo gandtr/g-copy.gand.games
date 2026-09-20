@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, minimum-scale=1, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>G COPY — Gand Games</title>
 
     <!-- Load custom style sheet -->
@@ -14,7 +14,7 @@
       <h1>G COPY</h1>
       <div class="canvas-container">
         <canvas id="loadingCanvas" oncontextmenu="event.preventDefault()" width="800" height="600"></canvas>
-        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+        <canvas tabindex="0" aria-label="G Copy game" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
       </div>
       <div class="toolbar">
         <div class="toolbar-left">
@@ -28,41 +28,48 @@
     </div>
 
     <script type='text/javascript'>
-      function goFullScreen(){
-            var canvas = document.getElementById("canvas");
-            if(canvas.requestFullScreen)
-                canvas.requestFullScreen();
-            else if(canvas.webkitRequestFullScreen)
-                canvas.webkitRequestFullScreen();
-            else if(canvas.mozRequestFullScreen)
-                canvas.mozRequestFullScreen();
+      async function goFullScreen() {
+        try {
+          if (document.fullscreenElement) await document.exitFullscreen();
+          else await document.querySelector('.game-wrapper').requestFullscreen();
+        } catch (error) {
+          statusText.textContent = 'FULLSCREEN UNAVAILABLE';
+        }
       }
-      function FullScreenHook(){
-        var canvas = document.getElementById("canvas");
-        canvas.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-        canvas.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+      function resizeGame() {
+        if (!Module.setCanvasSize) return;
+        var area = document.querySelector('.canvas-container');
+        var ratio = window.devicePixelRatio || 1;
+        var width = Math.max(1, Math.round(area.clientWidth * ratio));
+        var height = Math.max(1, Math.round(area.clientHeight * ratio));
+        if (Module.canvas.width !== width || Module.canvas.height !== height) {
+          Module.setCanvasSize(width, height);
+        }
       }
+      new ResizeObserver(resizeGame).observe(document.querySelector('.canvas-container'));
+      window.addEventListener('resize', resizeGame);
+      document.addEventListener('fullscreenchange', resizeGame);
       var loadingContext = document.getElementById('loadingCanvas').getContext('2d');
       function drawLoadingText(text) {
         var canvas = loadingContext.canvas;
 
         // Dark background
         loadingContext.fillStyle = "#05090a";
-        loadingContext.fillRect(0, 0, canvas.scrollWidth, canvas.scrollHeight);
+        loadingContext.fillRect(0, 0, canvas.width, canvas.height);
 
         // Grid pattern
         loadingContext.strokeStyle = "rgba(60, 110, 120, 0.15)";
         loadingContext.lineWidth = 1;
-        for (var x = 0; x < canvas.scrollWidth; x += 32) {
+        for (var x = 0; x < canvas.width; x += 32) {
           loadingContext.beginPath();
           loadingContext.moveTo(x, 0);
-          loadingContext.lineTo(x, canvas.scrollHeight);
+          loadingContext.lineTo(x, canvas.height);
           loadingContext.stroke();
         }
-        for (var y = 0; y < canvas.scrollHeight; y += 32) {
+        for (var y = 0; y < canvas.height; y += 32) {
           loadingContext.beginPath();
           loadingContext.moveTo(0, y);
-          loadingContext.lineTo(canvas.scrollWidth, y);
+          loadingContext.lineTo(canvas.width, y);
           loadingContext.stroke();
         }
 
@@ -70,20 +77,20 @@
         loadingContext.font = 'bold 16px "Share Tech Mono", "Courier New", monospace';
         loadingContext.textAlign = 'center';
         loadingContext.fillStyle = "#8fb8bf";
-        loadingContext.fillText(text.toUpperCase(), canvas.scrollWidth / 2, canvas.scrollHeight / 2);
+        loadingContext.fillText(text.toUpperCase(), canvas.width / 2, canvas.height / 2);
 
         // Title
         loadingContext.font = 'bold 28px "Share Tech Mono", "Courier New", monospace';
         loadingContext.fillStyle = "#59c7d1";
         loadingContext.shadowColor = "rgba(89, 199, 209, 0.5)";
         loadingContext.shadowBlur = 15;
-        loadingContext.fillText("G COPY", canvas.scrollWidth / 2, canvas.scrollHeight / 2 - 60);
+        loadingContext.fillText("G COPY", canvas.width / 2, canvas.height / 2 - 60);
         loadingContext.shadowBlur = 0;
 
         // Subtitle
         loadingContext.font = '12px "Share Tech Mono", "Courier New", monospace';
         loadingContext.fillStyle = "#55777d";
-        loadingContext.fillText("A GAND GAMES RELEASE", canvas.scrollWidth / 2, canvas.scrollHeight / 2 + 40);
+        loadingContext.fillText("A GAND GAMES RELEASE", canvas.width / 2, canvas.height / 2 + 40);
       }
 
       var statusText = document.getElementById('statusText');
@@ -92,11 +99,22 @@
       window.onclick = function () { window.focus(); };
 
       window.addEventListener("keydown", function(e) {
+        if (e.key === 'F11') {
+          e.preventDefault();
+          if (!e.repeat) goFullScreen();
+          e.stopImmediatePropagation();
+          return;
+        }
+        if (e.key === 'Tab' && document.activeElement === Module.canvas) e.preventDefault();
         // space and arrow keys
         if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
           e.preventDefault();
         }
-      }, false);
+      }, true);
+
+      document.getElementById('canvas').addEventListener('pointerdown', function() {
+        this.focus();
+      });
 
       var Module = {
         arguments: ["./game.love"],
@@ -120,6 +138,7 @@
             document.getElementById('loadingCanvas').style.display = 'none';
             document.getElementById('canvas').style.visibility = 'visible';
             if (statusText) statusText.textContent = 'ACTIVE';
+            requestAnimationFrame(resizeGame);
           }
         },
         totalDependencies: 0,
@@ -147,7 +166,7 @@
     <script type="text/javascript" src="game.js"></script>
     <script async type="text/javascript" src="love.js" onload="applicationLoad(this)"></script>
     <footer>
-      <p>A <a href="https://gand.games">Gand Games</a> release &bull; Built with <a href="https://github.com/Davidobot/love.js">love.js</a> &bull; Reload if screen is blank</p>
+      <p>A <a href="https://gand.games">Gand Games</a> release &bull; Built with <a href="https://github.com/Davidobot/love.js">love.js</a> &bull; Copy, verify, deliver</p>
     </footer>
   </body>
 </html>

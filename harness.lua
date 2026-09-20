@@ -56,7 +56,7 @@ local function ensureDir()
   if package.config:sub(1, 1) == "\\" then
     os.execute('mkdir "' .. dir .. '" 2>nul')
   else
-    os.execute("mkdir -p '" .. dir .. "'")
+    os.execute("mkdir -p -- '" .. dir:gsub("'", "'\\''") .. "'")
   end
 end
 

@@ -38,7 +38,20 @@ function UI.panel(x,y,w,h)
     UI.outline(x,y,w,h,"cyan"); UI.outline(x+2,y+2,w-4,h-4,"dim")
 end
 function UI.contains(x,y,bx,by,bw,bh) return x>=bx and x<bx+bw and y>=by and y<by+bh end
-function UI.begin(mx,my) UI.regions={}; UI.mx,UI.my=mx,my; UI.tip=nil end
+function UI.begin(mx,my,scene)
+    if UI.scene~=scene then UI.focusIndex=nil; UI.scene=scene end
+    UI.regions={}; UI.mx,UI.my=mx,my; UI.tip=nil
+end
+function UI.focusNext(backward)
+    if #UI.regions==0 then return end
+    local index=UI.focusIndex or (backward and 1 or 0)
+    UI.focusIndex=(index-1+(backward and -1 or 1))%#UI.regions+1
+end
+function UI.focused() return UI.regions[UI.focusIndex] end
+function UI.drawFocus()
+    local r=UI.focused()
+    if r then UI.outline(r.x-1,r.y-1,r.w+2,r.h+2,"white") end
+end
 function UI.hot(id,x,y,w,h,value,tip)
     local region={id=id,x=x,y=y,w=w,h=h,value=value,tip=tip}
     UI.regions[#UI.regions+1]=region
@@ -60,11 +73,15 @@ function UI.hit(x,y)
     end
 end
 function UI.transform()
-    local w,h=love.graphics.getDimensions(); local scale=math.min(w/UI.W,h/UI.H)
-    -- Snap to whole physical pixels on Retina as well as standard displays.
-    local dpi=love.window.getDPIScale()
-    if scale*dpi>=1 then scale=math.floor(scale*dpi)/dpi end
-    return scale,math.floor((w-UI.W*scale)/2),math.floor((h-UI.H*scale)/2)
+    local w,h=love.graphics.getDimensions()
+    local view=UI.view or {x=58,y=30,w=640,h=544}
+    -- Fit the visible controls, not the unused black border of the source bitmap.
+    -- Fractional scales fill small windows too; nearest filtering keeps the art sharp.
+    local scale=math.min(w/view.w,h/view.h)
+    return scale,(w-view.w*scale)/2-view.x*scale,(h-view.h*scale)/2-view.y*scale
+end
+function UI.setView(app)
+    UI.view={x=58,y=30,w=640,h=app.page and 544 or app.game.repair and 442 or 406}
 end
 function UI.mouse(x,y) local s,ox,oy=UI.transform(); return (x-ox)/s,(y-oy)/s end
 return UI

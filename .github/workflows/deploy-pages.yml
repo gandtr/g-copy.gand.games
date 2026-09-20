@@ -44,8 +44,28 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install test runtimes
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y luajit
+          npx playwright install --with-deps chromium
+
+      - name: Test game and save bridge
+        run: npm test
+
       - name: Build web
         run: bash build_web.sh
+
+      - name: Test browser playthroughs and responsive layout
+        run: |
+          python3 serve.py > /tmp/g-copy-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          for attempt in {1..30}; do
+            if curl -fsS http://localhost:8000/ > /dev/null; then break; fi
+            sleep 1
+          done
+          npm run test:web
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
