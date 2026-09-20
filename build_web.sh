@@ -39,6 +39,7 @@ node tools/inject_bridge.js "$DIST_DIR/love.js" web_template/storage-bridge.js
 echo "Applying custom web template..."
 cp -f web_template/index.html "$DIST_DIR/index.html"
 cp -rf web_template/theme/* "$DIST_DIR/theme/"
+cp web_template/og-g-copy-v1.png "$DIST_DIR/og-g-copy-v1.png"
 
 # GitHub Pages cannot send COOP/COEP response headers, which the threaded
 # love.js build needs for SharedArrayBuffer. The vendored coi-serviceworker
