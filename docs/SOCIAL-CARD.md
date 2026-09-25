@@ -2,17 +2,24 @@
 
 The site includes static Open Graph and Twitter `summary_large_image` metadata in
 `web_template/index.html`. `build_web.sh` publishes the image at
-`https://g-copy.gand.games/og-g-copy-v1.png`.
+`https://g-copy.gand.games/og-g-copy-v2.jpg`.
 
-The final PNG is 1730 × 909 pixels. When replacing it, increment the filename and
-update both image URLs and dimensions in the metadata so cached previews can pick
-up the new asset.
+The published card is a 1200 × 630 JPEG (about 250 KB) made from the 1730 × 909
+master `web_template/og-g-copy-v1.png`, which is kept in the repo but not shipped:
+
+```sh
+magick web_template/og-g-copy-v1.png -resize 1200x630^ -gravity center -extent 1200x630 \
+  -strip -sampling-factor 4:4:4 -quality 88 web_template/og-g-copy-v2.jpg
+```
+
+When replacing it, increment the filename and update both image URLs and
+dimensions in the metadata so cached previews can pick up the new asset.
 
 ## Image provenance
 
 Created with the built-in image generation tool using
 `assets/visuals/g-copy-gand.png` as the logo/style reference. The source game image
-was left unchanged. The final asset is `web_template/og-g-copy-v1.png`.
+was left unchanged. The generated master is `web_template/og-g-copy-v1.png`.
 
 Final generation prompt:
 

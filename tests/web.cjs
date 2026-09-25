@@ -40,11 +40,13 @@ async function main() {
         const data = await page.evaluate(() => {
           const canvas=document.querySelector('#canvas');
           return {box:canvas.getBoundingClientRect().toJSON(), width:innerWidth,height:innerHeight,
-            scrollWidth:document.documentElement.scrollWidth,scrollHeight:document.documentElement.scrollHeight,
+            scrollWidth:document.documentElement.scrollWidth,
+            stageBottom:document.querySelector('.game-wrapper').getBoundingClientRect().bottom+scrollY,
             backing:[canvas.width,canvas.height],dpr:devicePixelRatio};
         });
         assert(data.box.x>=0 && data.box.y>=0 && data.box.right<=data.width+1 && data.box.bottom<=data.height+1, 'canvas fits viewport');
-        assert(data.scrollWidth<=data.width+1 && data.scrollHeight<=data.height+1, 'page does not overflow');
+        // The about text below the game may scroll; the game itself must fill only the first screen.
+        assert(data.scrollWidth<=data.width+1 && data.stageBottom<=data.height+1, 'game fits the first screen, no sideways scroll');
         assert(Math.abs(data.backing[0]-data.box.width*data.dpr)<2, 'backing pixels follow DPR');
         console.log(name, 'layout', data.backing, data.box.width, data.box.height);
       }

@@ -20,17 +20,11 @@ body {
             rgba(0, 20, 24, 0.03) 2px,
             rgba(0, 20, 24, 0.03) 4px
         );
+    /* The glow stays on the first screen; the scanlines continue under the about text. */
+    background-repeat: no-repeat, repeat;
     font-family: 'Share Tech Mono', 'Courier New', monospace;
     color: #8fb8bf;
-    min-height: 0;
-    height: 100dvh;
     padding: 8px;
-    gap: 6px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
 }
 
 h1 {
@@ -48,10 +42,10 @@ h1 {
     text-align: center;
 }
 
+/* The game fills the first screen; the about text and footer sit below it. */
 .game-wrapper {
     width: 100%;
-    flex: 1;
-    min-height: 0;
+    height: calc(100dvh - 16px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -173,6 +167,45 @@ button:active, .btn:active {
     transform: translateY(1px);
 }
 
+.about {
+    max-width: 720px;
+    margin: 48px auto 32px;
+    padding: 0 8px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.about h2 {
+    font-family: 'Press Start 2P', 'Share Tech Mono', monospace;
+    font-size: 11px;
+    font-weight: normal;
+    color: #59c7d1;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 32px 0 12px;
+}
+
+.about h2:first-child { margin-top: 0; }
+.about p, .about ol, .about ul { margin-bottom: 12px; }
+.about ol, .about ul { padding-left: 24px; }
+.about li { margin-bottom: 4px; }
+
+.about img {
+    display: block;
+    width: 100%;
+    max-width: 540px;
+    height: auto;
+    margin: 24px auto;
+    border: 2px solid #2f4a4f;
+}
+
+.about kbd {
+    font-family: inherit;
+    color: #59c7d1;
+    border: 1px solid #2f4a4f;
+    padding: 0 4px;
+}
+
 footer {
     margin-top: 0;
     flex: none;
@@ -205,8 +238,9 @@ footer a:hover {
 #canvas { touch-action: none; outline: none; }
 .game-wrapper:fullscreen { height: 100%; background: #05090a; padding: 8px; }
 @media (max-height: 500px) {
-    h1, footer { display: none; }
+    h1 { display: none; }
     body { padding: 4px; }
+    .game-wrapper { height: calc(100dvh - 8px); }
     .toolbar { padding: 3px 8px; }
 }
 @media (max-width: 500px) {
