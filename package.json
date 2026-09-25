@@ -10,6 +10,7 @@
   "scripts": {
     "test": "luajit tests/run.lua && node tests/storage-bridge.cjs",
     "test:web": "node tests/web.cjs",
-    "build": "bash build_web.sh"
+    "build": "bash build_web.sh",
+    "build:itch": "bash build_itch.sh"
   }
 }
