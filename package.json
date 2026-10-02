@@ -8,7 +8,7 @@
     "playwright": "1.58.2"
   },
   "scripts": {
-    "test": "luajit tests/run.lua && node tests/storage-bridge.cjs",
+    "test": "luajit tests/run.lua && node tests/storage-bridge.cjs && node tests/web-shell.cjs",
     "test:web": "node tests/web.cjs",
     "build": "bash build_web.sh",
     "build:itch": "bash build_itch.sh"
