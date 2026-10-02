@@ -39,7 +39,8 @@
       <h1>G COPY</h1>
       <div class="canvas-container">
         <canvas id="loadingCanvas" oncontextmenu="event.preventDefault()" width="800" height="600"></canvas>
-        <canvas tabindex="0" aria-label="G Copy game" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+        <canvas tabindex="0" aria-label="G Copy game" aria-describedby="game-keyboard-help" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+        <p id="game-error" class="game-error" role="alert" hidden></p>
       </div>
       <div class="toolbar">
         <div class="toolbar-left">
@@ -47,7 +48,7 @@
           <span id="statusText">INITIALIZING...</span>
         </div>
         <div class="toolbar-right">
-          <button onclick="goFullScreen();">FULLSCREEN</button>
+          <button id="fullscreen-button" onclick="goFullScreen();">FULLSCREEN</button>
         </div>
       </div>
     </div>
@@ -73,7 +74,7 @@
         <li><kbd>Space</kbd> or <kbd>R</kbd> retry or repeat</li>
         <li><kbd>B</kbd> market, <kbd>I</kbd> disk info, <kbd>V</kbd> verify, <kbd>P</kbd> pause, <kbd>H</kbd> help</li>
         <li><kbd>Shift</kbd> hold for turbo</li>
-        <li><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> move between controls</li>
+        <li id="game-keyboard-help"><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> move between game controls. <kbd>Shift+Esc</kbd> leaves the game and focuses the fullscreen button.</li>
         <li><kbd>F11</kbd> fullscreen, <kbd>Esc</kbd> close a panel or pause</li>
       </ul>
     </section>
@@ -145,18 +146,37 @@
       }
 
       var statusText = document.getElementById('statusText');
+      var gameFailed = false;
+      function showGameError(message) {
+        gameFailed = true;
+        statusText.textContent = 'UNAVAILABLE';
+        var error = document.getElementById('game-error');
+        error.textContent = message;
+        error.hidden = false;
+        document.getElementById('loadingCanvas').style.display = 'none';
+        document.getElementById('canvas').style.visibility = 'hidden';
+      }
 
       window.onload = function () { window.focus(); };
       window.onclick = function () { window.focus(); };
 
       window.addEventListener("keydown", function(e) {
-        if (e.key === 'F11') {
+        if (e.key === 'F11' && (document.activeElement === Module.canvas || document.fullscreenElement)) {
           e.preventDefault();
           if (!e.repeat) goFullScreen();
           e.stopImmediatePropagation();
           return;
         }
-        if (e.key === 'Tab' && document.activeElement === Module.canvas) e.preventDefault();
+        // Leave normal page navigation alone when the game does not own focus.
+        if (document.activeElement !== Module.canvas) return;
+        // Tab navigates the game's controls; always offer a documented way out.
+        if (e.key === 'Escape' && e.shiftKey) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          document.getElementById('fullscreen-button').focus();
+          return;
+        }
+        if (e.key === 'Tab') e.preventDefault();
         // space and arrow keys
         if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
           e.preventDefault();
@@ -170,18 +190,33 @@
       var Module = {
         arguments: ["./game.love"],
         INITIAL_MEMORY: 67108864,
-        printErr: console.error.bind(console),
+        printErr: function() {
+          console.error.apply(console, arguments);
+          var message = Array.prototype.join.call(arguments, ' ');
+          if (/Unable to create OpenGL window|OpenGL context creation error/i.test(message)) {
+            showGameError("This browser could not start the game's graphics. Try a browser with WebGL support and hardware acceleration available.");
+          }
+        },
+        onAbort: function() {
+          showGameError('The game could not start. Please reload the page or try another browser.');
+        },
         canvas: (function() {
           var canvas = document.getElementById('canvas');
 
           // As a default initial behavior, pop up an alert when webgl context is lost. To make your
           // application robust, you may want to override this behavior before shipping!
           // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
-          canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+          canvas.addEventListener("webglcontextlost", function(e) {
+            e.preventDefault();
+            showGameError('The graphics connection was lost. Please reload the page to restart the game.');
+          }, false);
 
           return canvas;
         })(),
         setStatus: function(text) {
+          // Runtime callbacks may continue after a fatal graphics/startup error.
+          // Never replace an actionable failure with a misleading ACTIVE state.
+          if (gameFailed) return;
           if (text) {
             drawLoadingText(text);
             if (statusText) statusText.textContent = text.toUpperCase();
@@ -202,12 +237,7 @@
       };
       Module.setStatus('Downloading...');
       window.onerror = function(event) {
-        // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
-        Module.setStatus('Exception thrown, see JavaScript console');
-        if (statusText) statusText.textContent = 'ERROR';
-        Module.setStatus = function(text) {
-          if (text) Module.printErr('[post-exception status] ' + text);
-        };
+        showGameError('The game encountered an error. Please reload the page to try again.');
       };
 
       var applicationLoad = function(e) {
